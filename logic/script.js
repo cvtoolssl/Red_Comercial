@@ -8,31 +8,31 @@ let allProducts = [];
 let stockMap = new Map();
 let currentTariffFile = 'Tarifa_General.json'; 
 
-// --- FUNCIÓN MEJORADA PARA EXTRAER CANTIDAD MÍNIMA ---
+// --- EXTRAER CANTIDAD MÍNIMA (Ej: "Neto 120 uds" -> 120) ---
 function extractMinQty(text) {
     if (!text || typeof text !== 'string') return 0;
-    
-    // Convertimos a minúsculas para buscar mejor
     const lowerText = text.toLowerCase();
-
-    // 1. Buscar patrones explícitos como "120 uds", "100 unid", "60 cajas"
-    // \d+ = número, \s* = espacios opcionales
     let match = lowerText.match(/(\d+)\s*(ud|unid|pz|pza|cj|caja|estuche)/);
     if (match) return parseInt(match[1]);
-
-    // 2. Buscar patrones de condición como "partir de 100", "minimo 50"
     match = lowerText.match(/(?:partir de|minimo|mínimo|min)\s*(\d+)/);
     if (match) return parseInt(match[1]);
-
-    // 3. Si es un texto simple tipo "Neto 100", cogemos el número
-    // Pero cuidado con los precios (ej: 5.50). Buscamos un número que NO tenga punto/coma cerca
     match = lowerText.match(/\b(\d+)\b/);
-    if (match) {
-        const val = parseInt(match[0]);
-        // Filtro básico: si es menor que 2, probablemente no sea una cantidad mínima de neto relevante
-        if (val > 1) return val;
-    }
+    if (match && parseInt(match[0]) > 1) return parseInt(match[0]);
+    return 0;
+}
 
+// --- EXTRAER PRECIO NETO (Ej: "5,50€ neto" -> 5.50) ---
+function extractNetPrice(text) {
+    if (!text || typeof text !== 'string') return 0;
+    // Busca número con decimales (coma o punto)
+    // Ej: 5,50 o 5.50 o 12
+    // Regex simplificado que busca "digitos + separador opcional + digitos"
+    const match = text.match(/(\d+[.,]?\d*)/);
+    if (match) {
+        // Reemplaza coma por punto para que JS lo entienda
+        const normalized = match[0].replace(',', '.');
+        return parseFloat(normalized);
+    }
     return 0;
 }
 
@@ -83,28 +83,22 @@ tariffSelector.addEventListener('change', (event) => {
     loadTariffData(currentTariffFile);
 });
 
-// Búsqueda
 searchInput.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase().trim();
     if (query.length < 2) {
         resultsContainer.innerHTML = '';
         return;
     }
-
     const filteredProducts = allProducts.filter(product => {
         const descripcion = product.Descripcion ? product.Descripcion.toLowerCase() : '';
         const referencia = product.Referencia ? String(product.Referencia).toLowerCase() : '';
-        
         const stockInfo = stockMap.get(String(product.Referencia));
         if (stockInfo && stockInfo.Estado === 'no') return false;
-
         return descripcion.includes(query) || referencia.includes(query);
     });
-
     displayResults(filteredProducts);
 });
 
-// --- MOSTRAR RESULTADOS ---
 function displayResults(products) {
     if (products.length === 0) {
         resultsContainer.innerHTML = '<p style="text-align: center; color: var(--subtle-text);">No se encontraron resultados.</p>';
@@ -113,7 +107,6 @@ function displayResults(products) {
 
     let html = '';
     products.forEach((product, index) => {
-        // Precios
         let pvpBase = 0;
         let descuento = 'N/A';
         let precioFinal = 'N/A';
@@ -166,13 +159,13 @@ function displayResults(products) {
             }
         } 
         
-        // Datos seguros
         const safeRef = String(product.Referencia || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeDesc = String(product.Descripcion || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeNeto = String(precioNeto || 'No aplica').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
-        // Extraemos la cantidad mínima para el neto (USANDO LA NUEVA FUNCIÓN)
+        // Extracción de datos para la lógica
         const minQty = extractMinQty(precioNeto);
+        const netPriceVal = extractNetPrice(precioNeto);
         
         const qtyInputId = `qty_${index}`;
 
@@ -193,12 +186,11 @@ function displayResults(products) {
                     <p class="price-line"><strong>Precio Neto:</strong> <span class="neto-price">${precioNeto}</span></p>
                 </div>
 
-                <!-- CONTROLES AÑADIR -->
                 <div class="add-controls">
                     <input type="number" id="${qtyInputId}" class="qty-input" value="1" min="1">
                     
-                    <!-- PASAMOS minQty COMO 6º PARÁMETRO -->
-                    <button class="add-budget-btn" onclick="addToBudget('${safeRef}', '${safeDesc}', ${precioFinal}, document.getElementById('${qtyInputId}').value, '${safeNeto}', ${minQty})">
+                    <!-- PASAMOS 7 PARÁMETROS AHORA -->
+                    <button class="add-budget-btn" onclick="addToBudget('${safeRef}', '${safeDesc}', ${precioFinal}, document.getElementById('${qtyInputId}').value, '${safeNeto}', ${minQty}, ${netPriceVal})">
                         + Añadir al presupuesto
                     </button>
                 </div>

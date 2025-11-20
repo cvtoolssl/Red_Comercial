@@ -347,3 +347,107 @@ h1 { font-size: 2.2rem; font-weight: 600; margin: 0; color: #333; }
 .download-button.excel { background-color: #1D6F42; }
 .download-button.pdf { background-color: #B30B00; }
 .back-link { display: inline-block; margin-top: 1.5rem; color: var(--primary-color); text-decoration: none; font-weight: 500; }
+/* --- ESTILOS ESPECÍFICOS: GARANTÍAS Y ENVIAR ALTA --- */
+
+/* Contenedor principal de texto (La tarjeta blanca) */
+.content-box {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.content-box h2 {
+    margin-top: 0;
+    color: var(--text-color);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.content-box p {
+    line-height: 1.6;
+    color: #444;
+    margin-bottom: 1.5rem;
+}
+
+/* Caja del enlace (Input + Botón) */
+.link-box {
+    display: flex;
+    gap: 10px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px dashed #ccc;
+    align-items: center;
+}
+
+/* Input del enlace (URL) */
+.link-box input {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Courier New', monospace; /* Fuente tipo código */
+    font-size: 0.95rem;
+    color: #333;
+    background-color: white;
+    outline: none;
+}
+
+/* Botón de copiar */
+.link-box button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    white-space: nowrap; /* Evita que el texto se parta en móviles */
+}
+
+.link-box button:hover {
+    background-color: #0056b3;
+}
+
+.link-box button:active {
+    transform: scale(0.98);
+}
+
+/* Mensaje de "Copiado" */
+#copy-feedback {
+    text-align: center;
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 1px solid #c3e6cb;
+    font-weight: 500;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+#copy-feedback.feedback-hidden {
+    opacity: 0;
+    display: none;
+}
+
+/* Ajuste para móviles */
+@media (max-width: 600px) {
+    .link-box {
+        flex-direction: column; /* Uno debajo del otro en móvil */
+        align-items: stretch;
+    }
+    
+    .link-box button {
+        width: 100%;
+    }
+}
