@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar Enlace de Alta - CV Tools</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-alta-cliente">
+    <div class="container">
+        <header>
+            <img src="img/cvtools.png" alt="CV Tools Logo" class="main-logo">
+            <h1>Enviar Formulario de Alta a Cliente</h1>
+        </header>
+
+        <main class="content-box">
+            <h2>Instrucciones para el Comercial</h2>
+            <p>Copia el siguiente enlace y envíaselo al nuevo cliente para que rellene sus datos. Una vez que lo complete, podrá descargar los documentos necesarios.</p>
+            
+            <div class="link-box">
+                <!-- IMPORTANTE: Reemplaza esta URL con la URL final de tu página alta_cliente.html en GitHub -->
+                <input type="text" value="https://pablo2vbng.github.io/preciosCVTools/alta_cliente.html" id="claim-link" readonly>
+                <button id="copy-button">Copiar Enlace</button>
+            </div>
+            <p id="copy-feedback" class="feedback-hidden">¡Enlace copiado!</p>
+            
+            <a href="index.html" class="back-link">← Volver al menú principal</a>
+        </main>
+    </div>
+
+    <script>
+        const copyButton = document.getElementById('copy-button');
+        const linkInput = document.getElementById('claim-link');
+        const feedback = document.getElementById('copy-feedback');
+
+        copyButton.addEventListener('click', () => {
+            linkInput.select();
+            document.execCommand('copy');
+            feedback.classList.remove('feedback-hidden');
+            setTimeout(() => {
+                feedback.classList.add('feedback-hidden');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

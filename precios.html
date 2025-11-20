@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Precios - CV Tools</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-precios">
+    <div class="container">
+        <header>
+            <img src="img/cvtools.png" alt="CV Tools Logo" class="main-logo">
+            <h1>Buscador de Precios</h1>
+        </header>
+
+        <main>
+            <div id="search-wrapper">
+                 <!-- (El resto del contenido no cambia) -->
+                 <div class="tariff-selector-wrapper">
+                    <label for="tariffSelector">Selecciona una Tarifa:</label>
+                    <select id="tariffSelector">
+                        <option value="Tarifa_General.json" selected>Tarifa General</option>
+                        <option value="Tarifa_Bigmat.json">Tarifa BigMat</option>
+                        <option value="Tarifa_Neopro.json">Tarifa Neopro</option>
+                        <option value="Tarifa_Ehlis.json">Tarifa Ehlis</option>
+                        <option value="Tarifa_Cecofersa.json">Tarifa Cecofersa</option>
+                        <option value="Tarifa_Synergas.json">Tarifa Synergas</option>
+                        <option value="Tarifa_Grandes_Cuentas.json">Tarifa Grandes Cuentas</option>
+                        <option value="Tarifa_Coferdroza.json">Tarifa Coferdroza</option>
+                    </select>
+                 </div>
+                 <input type="text" id="searchInput" placeholder="Buscar por referencia o descripción...">
+            </div>
+            <div id="resultsContainer"></div>
+            <a href="index.html" class="back-link">← Volver al menú principal</a>
+        </main>
+    </div>
+    <script src="logic/script.js"></script>
+</body>
+</html>
