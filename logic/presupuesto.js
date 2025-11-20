@@ -186,7 +186,7 @@ function copyBudgetToClipboard() {
     if (budget.length === 0) return;
 
     let subtotal = 0;
-    let text = `📦 *PEDIDO CV TOOLS*\n------------------------------\n`;
+    let text = `📦 *PRESUPUESTO CV TOOLS*\n------------------------------\n`;
     
     budget.forEach(item => {
         const calc = calculateItemTotal(item);
@@ -212,7 +212,7 @@ function copyBudgetToClipboard() {
     text += `------------------------------\n`;
     text += `Subtotal: ${subtotal.toFixed(2)} €\n`;
     text += costeEnvio > 0 ? `Portes:   ${costeEnvio.toFixed(2)} €\n` : `Portes:   GRATIS\n`;
-    text += `💰 *TOTAL A PAGAR: ${totalFinal.toFixed(2)} €*\n`;
+    text += `💰 *TOTAL: ${totalFinal.toFixed(2)} €*\n`;
     text += `------------------------------\n(Precios válidos salvo error tipográfico)\n`;
 
     navigator.clipboard.writeText(text).then(() => {
