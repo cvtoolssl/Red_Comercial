@@ -52,3 +52,63 @@ h1 { font-size: 2.2rem; font-weight: 600; margin: 0; color: #333; }
 .form-section{background:var(--card-background);padding:1.5rem;border-radius:12px;border:1px solid var(--border-color);margin-bottom:1.5rem}.form-section h2{font-size:1.2rem;margin-top:0;padding-bottom:.75rem;border-bottom:1px solid var(--border-color)}.form-grid{display:grid;grid-template-columns:1fr;gap:1rem}@media (min-width:600px){.form-grid{grid-template-columns:1fr 1fr}.grid-full-width{grid-column:1 / -1}}.form-group{display:flex;flex-direction:column}.form-group label{font-weight:500;margin-bottom:.5rem;font-size:.9em}.form-group input,.form-group select{padding:10px;border:1px solid #ccc;border-radius:6px;font-size:1rem}.form-group input:focus{outline:0;border-color:var(--primary-color);box-shadow:0 0 0 3px rgba(0,122,255,.2)}.form-group input.error{border-color:#dc3545}.form-group .payment-options{display:flex;gap:1.5rem;align-items:center}.form-group .payment-options label{margin-bottom:0}.form-group .payment-options input{width:auto}.submit-button{background-color:var(--pastel-pink-text);color:#fff;font-size:1.1rem;font-weight:500;padding:14px;border:none;border-radius:8px;width:100%;cursor:pointer;transition:background-color .2s ease}.submit-button:hover{background-color:#6a0b38}.submit-button:disabled{background-color:#aaa;cursor:not-allowed}#form-feedback{text-align:center;padding:1rem;border-radius:8px;margin-top:1.5rem;display:none}#form-feedback.success{background-color:var(--pastel-green-bg);color:var(--pastel-green-text)}#form-feedback.error{background-color:var(--pastel-red-bg);color:var(--pastel-red-text)}
 /* (El resto de estilos de otras páginas no cambian) */
 #search-wrapper{margin-bottom:1rem}.tariff-selector-wrapper{margin-bottom:1rem}.tariff-selector-wrapper label{font-weight:500;color:var(--subtle-text);display:block;margin-bottom:.5rem}#tariffSelector{width:100%;padding:12px;font-size:1rem;background-color:var(--card-background);border:1px solid var(--border-color);border-radius:8px;box-sizing:border-box}#searchInput{width:100%;padding:15px;font-size:1rem;background-color:var(--card-background);border:1px solid var(--border-color);border-radius:12px;box-sizing:border-box;box-shadow:0 1px 2px rgba(0,0,0,.05)}#searchInput:focus{outline:0;border-color:var(--primary-color);box-shadow:0 0 0 3px rgba(0,122,255,.2)}.product-card-single{background:var(--card-background);margin-bottom:1rem;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 2px 4px rgba(0,0,0,.07);padding:1.5rem}.product-card-single h2{margin:0 0 5px 0;font-size:1.2rem;font-weight:500}.product-card-single>p{margin:4px 0 1rem 0;color:var(--subtle-text);font-size:.9rem}.price-details-grid{font-size:.9rem}.price-line{display:flex;justify-content:space-between;padding:6px 0;margin:0;border-bottom:1px solid #e9ecef}.price-line:last-child{border-bottom:none}.price-line strong{color:var(--subtle-text);font-weight:500}.price-line span{color:var(--text-color);font-weight:600}.price-line span.final-price{font-size:1.1em;color:#198754}.price-line span.neto-price{font-size:.9em;color:#0d6efd;text-align:right}.tech-sheet-card{background:var(--card-background);margin-bottom:1rem;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 2px 4px rgba(0,0,0,.07);padding:1.5rem}.tech-sheet-card h2{margin:0 0 .5rem 0;font-size:1.2rem;font-weight:500}.tech-sheet-info{font-size:.9rem;color:var(--subtle-text);margin-bottom:1.5rem}.tech-sheet-info strong{color:var(--text-color)}.tech-sheet-button{display:inline-flex;align-items:center;gap:8px;background-color:var(--primary-color);color:#fff;text-decoration:none;padding:10px 15px;border-radius:8px;font-weight:500;transition:background-color .2s ease,transform .2s ease}.tech-sheet-button:hover{background-color:#0056b3;transform:translateY(-2px)}.tech-sheet-button svg{display:block}.content-box{background:var(--card-background);padding:1.5rem;border-radius:12px;border:1px solid var(--border-color);margin-bottom:1.5rem}.content-box h2{margin-top:0}.link-box{display:flex;gap:.5rem}.link-box input{flex-grow:1;border:1px solid var(--border-color);border-radius:8px;padding:10px;font-family:monospace;background-color:#f8f9fa}.link-box button{background-color:var(--primary-color);color:#fff;border:none;border-radius:8px;padding:0 1rem;font-weight:500;cursor:pointer}.feedback-hidden{display:none}.download-button{display:block;box-sizing:border-box;width:100%;text-decoration:none;text-align:center;padding:12px;border-radius:8px;margin-top:1rem;font-weight:500;transition:background-color .2s ease;border:none;font-size:1rem;cursor:pointer}.download-button.excel{background-color:#1D6F42;color:#fff}.download-button.excel:hover{background-color:#165934}.download-button.pdf{background-color:#B30B00;color:#fff}.download-button.pdf:hover{background-color:#8C0900}.download-button:disabled{background-color:#aaa;cursor:not-allowed}.back-link{display:inline-block;margin-top:1.5rem;color:var(--primary-color);text-decoration:none;font-weight:500}
+/* --- ESTILOS PARA STOCK --- */
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .card-header {
+        flex-direction: column;
+    }
+}
+
+.stock-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: normal; /* Permite que el texto largo de fabricación baje de línea */
+    max-width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.stock-badge .icon {
+    margin-right: 6px;
+    font-size: 1.1em;
+}
+
+/* Estado: En Stock (>0) */
+.stock-ok {
+    background-color: #e8f5e9; /* Verde pastel fondo */
+    color: #1b5e20;           /* Verde oscuro texto */
+    border: 1px solid #c8e6c9;
+}
+
+/* Estado: Sin Stock (<=0) */
+.stock-ko {
+    background-color: #ffebee; /* Rojo pastel fondo */
+    color: #b71c1c;           /* Rojo oscuro texto */
+    border: 1px solid #ffcdd2;
+}
+
+/* Estado: Fabricación (fab y fab2) */
+.stock-fab {
+    background-color: #e3f2fd; /* Azul pastel fondo */
+    color: #0d47a1;           /* Azul oscuro texto */
+    border: 1px solid #bbdefb;
+}
+
+/* Ajuste pequeño para el texto de referencia */
+.ref-text {
+    margin: 4px 0 0 0 !important;
+    font-size: 0.9rem;
+    color: var(--subtle-text);
+}

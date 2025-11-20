@@ -5,16 +5,36 @@ const resultsContainer = document.getElementById('resultsContainer');
 const tariffSelector = document.getElementById('tariffSelector');
 
 let allProducts = [];
-// Tarifa por defecto
+let stockMap = new Map(); // Aquí guardaremos el stock para acceso rápido
 let currentTariffFile = 'Tarifa_General.json'; 
 
-// Función para cargar los datos de una tarifa específica desde la carpeta 'src'
+// 1. Función para cargar el Stock (Se ejecuta una sola vez al principio)
+async function loadStockData() {
+    try {
+        // Ajusta la ruta si es necesario, asumiendo que está en src/Stock.json
+        const response = await fetch(`src/Stock.json?v=${new Date().getTime()}`);
+        if (!response.ok) throw new Error("No se pudo cargar el Stock");
+        
+        const data = await response.json();
+        const stockArray = data.Stock || [];
+
+        // Convertimos el array en un Map para buscar rapidísimo por referencia (Artículo)
+        stockArray.forEach(item => {
+            // Convertimos la referencia a String para asegurar que coincida
+            stockMap.set(String(item.Artículo), item);
+        });
+        console.log("Stock cargado correctamente:", stockMap.size, "artículos.");
+
+    } catch (error) {
+        console.error('Error cargando el stock:', error);
+    }
+}
+
+// 2. Función para cargar los datos de una tarifa específica
 async function loadTariffData(tariffFile) {
     searchInput.placeholder = 'Cargando datos...';
+    resultsContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">Cargando productos y stock...</p>';
     
-    // CORRECCIÓN IMPORTANTE: 
-    // Como el script se ejecuta desde 'precios.html' (en la raíz), 
-    // la ruta debe ser 'src/', NO '../src/'.
     const fullPath = `src/${tariffFile}`;
 
     try {
@@ -35,12 +55,13 @@ async function loadTariffData(tariffFile) {
     resultsContainer.innerHTML = '';
 }
 
-// Carga la tarifa por defecto al iniciar
-document.addEventListener('DOMContentLoaded', () => {
+// Inicialización: Carga Stock primero, luego la Tarifa por defecto
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadStockData(); // Esperamos a que cargue el stock
     loadTariffData(currentTariffFile);
 });
 
-// Evento de cambio de tarifa
+// Evento cambio de tarifa
 tariffSelector.addEventListener('change', (event) => {
     currentTariffFile = event.target.value;
     loadTariffData(currentTariffFile);
@@ -49,19 +70,32 @@ tariffSelector.addEventListener('change', (event) => {
 // Lógica de búsqueda
 searchInput.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase().trim();
-    if (query.length < 2 || allProducts.length === 0) {
+    
+    // Limpiamos si hay menos de 2 caracteres
+    if (query.length < 2) {
         resultsContainer.innerHTML = '';
         return;
     }
+
+    // Filtramos productos de la tarifa
     const filteredProducts = allProducts.filter(product => {
         const descripcion = product.Descripcion ? product.Descripcion.toLowerCase() : '';
         const referencia = product.Referencia ? product.Referencia.toString().toLowerCase() : '';
+        
+        // FILTRO PREVIO DE STOCK:
+        // Si el producto tiene estado "no", ni siquiera lo buscamos/mostramos.
+        const stockInfo = stockMap.get(String(product.Referencia));
+        if (stockInfo && stockInfo.Estado === 'no') {
+            return false; // Lo excluye de la búsqueda directamente
+        }
+
         return descripcion.includes(query) || referencia.includes(query);
     });
+
     displayResults(filteredProducts);
 });
 
-// Mostrar resultados (Lógica de precios y descuentos)
+// 3. Mostrar resultados con lógica de Precios y Stock
 function displayResults(products) {
     if (products.length === 0) {
         resultsContainer.innerHTML = '<p style="text-align: center; color: var(--subtle-text);">No se encontraron resultados.</p>';
@@ -70,13 +104,13 @@ function displayResults(products) {
 
     let html = '';
     products.forEach((product) => {
+        // --- LÓGICA DE PRECIOS ---
         let pvpBase = 0;
         let descuento = 'N/A';
         let precioFinal = 'N/A';
         let precioNeto = 'No aplica';
         let precioFinalNumerico = 0;
 
-        // Lógica de descuentos según la tarifa seleccionada
         if (currentTariffFile.includes('General') || currentTariffFile.includes('Bigmat')) {
             descuento = '50%';
             precioFinalNumerico = product.PRECIO_ESTANDAR || 0;
@@ -109,11 +143,57 @@ function displayResults(products) {
         }
         
         precioFinal = precioFinalNumerico.toFixed(2);
+
+        // --- LÓGICA DE STOCK ---
+        // Buscamos la info en el mapa que cargamos al principio
+        const stockInfo = stockMap.get(String(product.Referencia));
+        let stockHtml = '';
+
+        if (stockInfo) {
+            const estado = stockInfo.Estado ? stockInfo.Estado.toLowerCase() : '';
+            const cantidad = stockInfo.Stock || 0;
+
+            // Regla 2: Estado "no" -> Ya se filtró en la búsqueda, pero por seguridad:
+            if (estado === 'no') return; 
+
+            // Regla 1: Estado "si"
+            if (estado === 'si') {
+                if (cantidad > 0) {
+                    // MODIFICADO: Solo mostramos "En stock", sin la cantidad
+                    stockHtml = `<div class="stock-badge stock-ok">
+                                    <span class="icon">✅</span> En stock
+                                 </div>`;
+                } else {
+                    stockHtml = `<div class="stock-badge stock-ko">
+                                    <span class="icon">❌</span> Sin stock
+                                 </div>`;
+                }
+            }
+            // Regla 3: fab
+            else if (estado === 'fab') {
+                stockHtml = `<div class="stock-badge stock-fab">
+                                <span class="icon">🏭</span> Producto de fabricación. Entrega aprox. 3-5 días.
+                             </div>`;
+            }
+            // Regla 4: fab2
+            else if (estado === 'fab2') {
+                stockHtml = `<div class="stock-badge stock-fab">
+                                <span class="icon">🏭</span> Producto de fabricación. Entrega aprox. 10-15 días.
+                             </div>`;
+            }
+        } 
         
+        // --- GENERAR HTML FINAL ---
         html += `
             <div class="product-card-single">
-                <h2>${product.Descripcion || 'Sin descripción'}</h2>
-                <p>Ref: ${product.Referencia || 'N/A'}</p>
+                <div class="card-header">
+                    <div>
+                        <h2>${product.Descripcion || 'Sin descripción'}</h2>
+                        <p class="ref-text">Ref: ${product.Referencia || 'N/A'}</p>
+                    </div>
+                    ${stockHtml} <!-- Aquí insertamos la etiqueta de stock -->
+                </div>
+                
                 <div class="price-details-grid">
                     <p class="price-line"><strong>PVP Base:</strong> <span>${pvpBase.toFixed(2)} €</span></p>
                     <p class="price-line"><strong>Descuento:</strong> <span>${descuento}</span></p>
