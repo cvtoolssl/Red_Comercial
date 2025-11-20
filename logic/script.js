@@ -8,12 +8,32 @@ let allProducts = [];
 let stockMap = new Map();
 let currentTariffFile = 'Tarifa_General.json'; 
 
-// Función auxiliar para extraer número del texto (Ej: "Neto 120 uds" -> 120)
+// --- FUNCIÓN MEJORADA PARA EXTRAER CANTIDAD MÍNIMA ---
 function extractMinQty(text) {
     if (!text || typeof text !== 'string') return 0;
-    // Busca una secuencia de dígitos
-    const match = text.match(/(\d+)/); 
-    return match ? parseInt(match[0]) : 0;
+    
+    // Convertimos a minúsculas para buscar mejor
+    const lowerText = text.toLowerCase();
+
+    // 1. Buscar patrones explícitos como "120 uds", "100 unid", "60 cajas"
+    // \d+ = número, \s* = espacios opcionales
+    let match = lowerText.match(/(\d+)\s*(ud|unid|pz|pza|cj|caja|estuche)/);
+    if (match) return parseInt(match[1]);
+
+    // 2. Buscar patrones de condición como "partir de 100", "minimo 50"
+    match = lowerText.match(/(?:partir de|minimo|mínimo|min)\s*(\d+)/);
+    if (match) return parseInt(match[1]);
+
+    // 3. Si es un texto simple tipo "Neto 100", cogemos el número
+    // Pero cuidado con los precios (ej: 5.50). Buscamos un número que NO tenga punto/coma cerca
+    match = lowerText.match(/\b(\d+)\b/);
+    if (match) {
+        const val = parseInt(match[0]);
+        // Filtro básico: si es menor que 2, probablemente no sea una cantidad mínima de neto relevante
+        if (val > 1) return val;
+    }
+
+    return 0;
 }
 
 // 1. Carga de Stock
@@ -151,7 +171,7 @@ function displayResults(products) {
         const safeDesc = String(product.Descripcion || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeNeto = String(precioNeto || 'No aplica').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
-        // Extraemos la cantidad mínima para el neto
+        // Extraemos la cantidad mínima para el neto (USANDO LA NUEVA FUNCIÓN)
         const minQty = extractMinQty(precioNeto);
         
         const qtyInputId = `qty_${index}`;
@@ -177,7 +197,7 @@ function displayResults(products) {
                 <div class="add-controls">
                     <input type="number" id="${qtyInputId}" class="qty-input" value="1" min="1">
                     
-                    <!-- Pasamos safeNeto y minQty al presupuesto -->
+                    <!-- PASAMOS minQty COMO 6º PARÁMETRO -->
                     <button class="add-budget-btn" onclick="addToBudget('${safeRef}', '${safeDesc}', ${precioFinal}, document.getElementById('${qtyInputId}').value, '${safeNeto}', ${minQty})">
                         + Añadir al presupuesto
                     </button>

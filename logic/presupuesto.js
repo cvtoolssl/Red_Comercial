@@ -10,7 +10,7 @@ const PEDIDO_MINIMO_PORTES = 400; // Umbral para portes gratis
 const COSTE_PORTES = 12.00;       // CORREGIDO: Portes a 12€
 
 // --- FUNCIÓN PRINCIPAL: AÑADIR ---
-// Ahora recibe 'minQty' (Cantidad mínima extraída del texto)
+// ref, desc, price, qty, netInfo (texto), minQty (número)
 function addToBudget(ref, desc, price, qty, netInfo, minQty) {
     // Aseguramos que qty sea al menos 1
     qty = parseInt(qty);
@@ -19,11 +19,12 @@ function addToBudget(ref, desc, price, qty, netInfo, minQty) {
     // Aseguramos que minQty sea un número (si no hay, es 0)
     minQty = parseInt(minQty) || 0;
 
-    // Comprobamos si el producto YA existe
+    // Comprobamos si el producto YA existe en el presupuesto
     const existingItem = budget.find(item => item.ref === String(ref));
 
     if (existingItem) {
         existingItem.qty += qty;
+        // Actualizamos la info de neto por si acaso
         existingItem.netInfo = netInfo; 
         existingItem.minQty = minQty;
     } else {
@@ -32,14 +33,14 @@ function addToBudget(ref, desc, price, qty, netInfo, minQty) {
             desc: String(desc), 
             price: parseFloat(price),
             qty: qty,
-            netInfo: netInfo, // Texto (ej: "Neto 100 uds")
-            minQty: minQty    // Número (ej: 100)
+            netInfo: netInfo, 
+            minQty: minQty
         });
     }
     
     updateBudgetUI();
     
-    // Feedback visual
+    // Feedback visual (animación botón flotante)
     const fab = document.getElementById('budget-fab');
     if(fab) {
         fab.style.transform = 'scale(1.3)';
@@ -96,21 +97,27 @@ function updateBudgetUI() {
         
         // LÓGICA DE NETO / CANTIDAD MÍNIMA
         let netInfoHtml = '';
-        // Si tiene condición de neto y la cantidad es MENOR que la mínima
-        if (item.netInfo && item.netInfo !== 'No aplica' && item.minQty > 0) {
+        
+        // Solo mostramos avisos si hay una condición de neto (minQty > 0)
+        if (item.minQty > 0) {
             if (item.qty < item.minQty) {
-                // NO CUMPLE
+                // NO CUMPLE: Mensaje ROJO
                 netInfoHtml = `
-                    <div style="color:#dc3545; font-size:0.8em; margin-top:2px;">
-                        ⚠️ <strong>No aplica Neto</strong> (Mín. ${item.minQty} uds)
+                    <div style="color:#dc3545; font-size:0.85em; margin-top:4px; padding:2px 5px; background:#fff5f5; border-radius:4px; border:1px solid #ffcdd2;">
+                        ⚠️ <strong>Cantidad insuficiente para Neto</strong><br>
+                        (Necesitas ${item.minQty} uds. Tienes ${item.qty})
                     </div>`;
             } else {
-                // SÍ CUMPLE
+                // SÍ CUMPLE: Mensaje VERDE
                 netInfoHtml = `
-                    <div style="color:#28a745; font-size:0.8em; margin-top:2px;">
-                        ✅ Precio Neto Aplicado
+                    <div style="color:#155724; font-size:0.85em; margin-top:4px; padding:2px 5px; background:#d4edda; border-radius:4px; border:1px solid #c3e6cb;">
+                        ✅ <strong>Precio Neto Aplicado</strong><br>
+                        (Condición cumplida: >${item.minQty} uds)
                     </div>`;
             }
+        } else if (item.netInfo && item.netInfo !== 'No aplica' && item.netInfo !== 'undefined') {
+            // Si hay texto pero no pudimos sacar el número, mostramos el texto en gris (informativo)
+            netInfoHtml = `<div style="color:#666; font-size:0.8em; margin-top:2px;">ℹ️ ${item.netInfo}</div>`;
         }
 
         html += `
@@ -169,7 +176,7 @@ function copyBudgetToClipboard() {
     if (subtotal < PEDIDO_MINIMO_PORTES) costeEnvio = COSTE_PORTES;
     let totalFinal = subtotal + costeEnvio;
 
-    let text = `📦 *PEDIDO CV TOOLS*\n`;
+    let text = `📦 *Presupuesto CV TOOLS*\n`;
     text += `------------------------------\n`;
     
     budget.forEach(item => {
@@ -178,11 +185,11 @@ function copyBudgetToClipboard() {
         text += `   Ref: ${item.ref}`;
         
         // INFO NETOS EN WHATSAPP
-        if (item.netInfo && item.netInfo !== 'No aplica' && item.minQty > 0) {
+        if (item.minQty > 0) {
             if (item.qty < item.minQty) {
-                text += `\n   ⚠️ CANTIDAD BAJA (Pide ${item.minQty} para neto)`;
+                text += `\n   ⚠️ CANTIDAD BAJA PARA NETO (Min: ${item.minQty})`;
             } else {
-                text += `\n   ✅ Neto Aplicado (${item.netInfo})`;
+                text += `\n   ✅ APLICA PRECIO NETO`;
             }
         }
         
@@ -198,7 +205,7 @@ function copyBudgetToClipboard() {
         text += `Portes:   GRATIS\n`;
     }
     
-    text += `💰 *TOTAL A PAGAR: ${totalFinal.toFixed(2)} €*\n`;
+    text += `💰 *TOTAL: ${totalFinal.toFixed(2)} €*\n`;
     text += `------------------------------\n`;
     text += `(Precios válidos salvo error tipográfico)\n`;
 
