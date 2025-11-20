@@ -112,3 +112,176 @@ h1 { font-size: 2.2rem; font-weight: 600; margin: 0; color: #333; }
     font-size: 0.9rem;
     color: var(--subtle-text);
 }
+
+/* --- DISCLAIMER DE STOCK --- */
+.stock-disclaimer {
+    font-size: 0.85rem;
+    color: var(--subtle-text);
+    background-color: #fff3cd; /* Fondo amarillo muy suave */
+    color: #856404;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+    border: 1px solid #ffeeba;
+    display: inline-block;
+}
+
+/* --- BOTÓN AÑADIR AL PRESUPUESTO (En la tarjeta de producto) --- */
+.add-budget-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+.add-budget-btn:hover { background-color: #0056b3; }
+.add-budget-btn:active { transform: scale(0.98); }
+
+/* --- BOTÓN FLOTANTE (FAB) --- */
+.budget-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #28a745; /* Verde éxito */
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.2s;
+}
+.budget-fab:hover { transform: scale(1.1); }
+.budget-fab span {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: red;
+    font-size: 0.8rem;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+/* --- MODAL (Ventana emergente) --- */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.modal.hidden { display: none; }
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.close-modal {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #aaa;
+}
+.budget-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.budget-item-info { font-size: 0.9rem; }
+.budget-item-price { font-weight: bold; color: #333; }
+.remove-btn {
+    background: none; border: none; cursor: pointer; color: #dc3545; margin-left: 10px; font-size: 1.2rem;
+}
+.budget-footer {
+    margin-top: 20px;
+    border-top: 2px solid #eee;
+    padding-top: 15px;
+}
+.total-display {
+    font-size: 1.2rem; font-weight: bold; text-align: right; margin-bottom: 15px;
+}
+.budget-actions {
+    display: flex; gap: 10px;
+}
+.btn-success, .btn-danger {
+    flex: 1; padding: 10px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer;
+}
+.btn-success { background-color: #28a745; }
+.btn-danger { background-color: #dc3545; }
+/* --- CONTROLES DE CANTIDAD Y AÑADIR --- */
+.add-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    align-items: center;
+}
+
+.qty-input {
+    width: 60px;
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.add-budget-btn {
+    flex-grow: 1; /* El botón ocupa el resto del espacio */
+    margin-top: 0; /* Quitamos el margen anterior */
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 9px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
+}
+.add-budget-btn:hover { background-color: #0056b3; }
+
+/* Estilo para la línea de portes en el modal */
+.budget-shipping {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    color: #666;
+    font-size: 0.95rem;
+    border-top: 1px dashed #ccc;
+    margin-top: 10px;
+}
+.budget-total-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #333;
+    border-top: 2px solid #333;
+}
