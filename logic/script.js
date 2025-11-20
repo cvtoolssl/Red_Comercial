@@ -8,6 +8,14 @@ let allProducts = [];
 let stockMap = new Map();
 let currentTariffFile = 'Tarifa_General.json'; 
 
+// Función auxiliar para extraer número del texto (Ej: "Neto 120 uds" -> 120)
+function extractMinQty(text) {
+    if (!text || typeof text !== 'string') return 0;
+    // Busca una secuencia de dígitos
+    const match = text.match(/(\d+)/); 
+    return match ? parseInt(match[0]) : 0;
+}
+
 // 1. Carga de Stock
 async function loadStockData() {
     try {
@@ -89,7 +97,7 @@ function displayResults(products) {
         let pvpBase = 0;
         let descuento = 'N/A';
         let precioFinal = 'N/A';
-        let precioNeto = 'No aplica'; // Esta es la condición escrita
+        let precioNeto = 'No aplica';
         let precioFinalNumerico = 0;
 
         if (currentTariffFile.includes('General') || currentTariffFile.includes('Bigmat')) {
@@ -138,16 +146,16 @@ function displayResults(products) {
             }
         } 
         
-        // Datos seguros (Escapar comillas para que no rompan el HTML del onclick)
+        // Datos seguros
         const safeRef = String(product.Referencia || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeDesc = String(product.Descripcion || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeNeto = String(precioNeto || 'No aplica').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
-        // ID único para input
+        // Extraemos la cantidad mínima para el neto
+        const minQty = extractMinQty(precioNeto);
+        
         const qtyInputId = `qty_${index}`;
 
-        // HTML Final
-        // En el onclick pasamos 'safeNeto' como 5º argumento
         html += `
             <div class="product-card-single">
                 <div class="card-header">
@@ -165,11 +173,12 @@ function displayResults(products) {
                     <p class="price-line"><strong>Precio Neto:</strong> <span class="neto-price">${precioNeto}</span></p>
                 </div>
 
-                <!-- CONTROLES DE AÑADIR -->
+                <!-- CONTROLES AÑADIR -->
                 <div class="add-controls">
                     <input type="number" id="${qtyInputId}" class="qty-input" value="1" min="1">
                     
-                    <button class="add-budget-btn" onclick="addToBudget('${safeRef}', '${safeDesc}', ${precioFinal}, document.getElementById('${qtyInputId}').value, '${safeNeto}')">
+                    <!-- Pasamos safeNeto y minQty al presupuesto -->
+                    <button class="add-budget-btn" onclick="addToBudget('${safeRef}', '${safeDesc}', ${precioFinal}, document.getElementById('${qtyInputId}').value, '${safeNeto}', ${minQty})">
                         + Añadir al presupuesto
                     </button>
                 </div>
