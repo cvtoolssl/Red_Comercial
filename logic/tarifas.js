@@ -4,14 +4,16 @@ window.jsPDF = window.jspdf.jsPDF;
 // Función para cargar un archivo JSON de tarifa específico desde la carpeta 'src'
 async function loadTariffForPdf(tariffFile) {
     try {
-        // CORRECCIÓN: Añadimos la ruta relativa correcta para subir desde 'logic' a la raíz
-        const response = await fetch(`../src/${tariffFile}?v=${new Date().getTime()}`);
-        if (!response.ok) throw new Error(`Error al cargar ../src/${tariffFile}`);
+        // CORRECCIÓN: Ruta relativa corregida. 
+        // Desde 'tarifas.html' (raíz), la carpeta 'src' es accesible directamente como 'src/'.
+        const response = await fetch(`src/${tariffFile}?v=${new Date().getTime()}`);
+        
+        if (!response.ok) throw new Error(`Error al cargar src/${tariffFile}`);
         const dataObject = await response.json();
         const sheetName = Object.keys(dataObject)[0];
         return dataObject[sheetName];
     } catch (error) {
-        alert(`No se pudo cargar la tarifa ${tariffFile} desde la carpeta 'src'. Asegúrate de que el archivo existe.`);
+        alert(`No se pudo cargar la tarifa ${tariffFile}. Revisa que el archivo JSON esté en la carpeta 'src'.`);
         console.error(error);
         return null;
     }

@@ -5,15 +5,17 @@ const resultsContainer = document.getElementById('resultsContainer');
 const tariffSelector = document.getElementById('tariffSelector');
 
 let allProducts = [];
-// Tarifa por defecto (solo el nombre del archivo, la ruta se añade después)
+// Tarifa por defecto
 let currentTariffFile = 'Tarifa_General.json'; 
 
 // Función para cargar los datos de una tarifa específica desde la carpeta 'src'
 async function loadTariffData(tariffFile) {
     searchInput.placeholder = 'Cargando datos...';
     
-    // CORRECCIÓN: Usamos ../ para subir desde 'logic' a la raíz y luego entrar en 'src'
-    const fullPath = `../src/${tariffFile}`;
+    // CORRECCIÓN IMPORTANTE: 
+    // Como el script se ejecuta desde 'precios.html' (en la raíz), 
+    // la ruta debe ser 'src/', NO '../src/'.
+    const fullPath = `src/${tariffFile}`;
 
     try {
         const response = await fetch(`${fullPath}?v=${new Date().getTime()}`);
@@ -38,13 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTariffData(currentTariffFile);
 });
 
-// Cuando el usuario cambia la tarifa, el 'value' del option es solo el nombre del archivo
+// Evento de cambio de tarifa
 tariffSelector.addEventListener('change', (event) => {
     currentTariffFile = event.target.value;
     loadTariffData(currentTariffFile);
 });
 
-// La lógica de búsqueda no necesita cambios
+// Lógica de búsqueda
 searchInput.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase().trim();
     if (query.length < 2 || allProducts.length === 0) {
@@ -59,7 +61,7 @@ searchInput.addEventListener('input', () => {
     displayResults(filteredProducts);
 });
 
-// La lógica de mostrar resultados no necesita cambios
+// Mostrar resultados (Lógica de precios y descuentos)
 function displayResults(products) {
     if (products.length === 0) {
         resultsContainer.innerHTML = '<p style="text-align: center; color: var(--subtle-text);">No se encontraron resultados.</p>';
@@ -74,6 +76,7 @@ function displayResults(products) {
         let precioNeto = 'No aplica';
         let precioFinalNumerico = 0;
 
+        // Lógica de descuentos según la tarifa seleccionada
         if (currentTariffFile.includes('General') || currentTariffFile.includes('Bigmat')) {
             descuento = '50%';
             precioFinalNumerico = product.PRECIO_ESTANDAR || 0;
