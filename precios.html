@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador de Precios - CV Tools</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- LIBRERÍAS PARA GENERAR PDF (Necesarias para el botón de descarga) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body class="page-precios">
+    
+    <!-- LOGO OCULTO PARA EL PDF -->
+    <img id="logo-for-pdf" src="img/cvtools.png" alt="Logo" style="display: none;">
+
     <div class="container">
         <header>
             <img src="img/cvtools.png" alt="CV Tools Logo" class="main-logo">
@@ -33,7 +41,7 @@
                  <!-- Campo de Búsqueda -->
                  <input type="text" id="searchInput" placeholder="Buscar por referencia o descripción...">
                  
-                 <!-- Nuevo Disclaimer de Stock -->
+                 <!-- Disclaimer de Stock -->
                  <p class="stock-disclaimer">
                     ℹ️ <strong>Información de Stock:</strong> La disponibilidad se actualiza diariamente a las 09:00 AM.
                  </p>
@@ -66,18 +74,19 @@
             <div class="budget-footer">
                 <p class="total-display">Total: <span id="budget-total">0.00</span> €</p>
                 <div class="budget-actions">
-                    <button onclick="clearBudget()" class="btn-danger">Borrar todo</button>
-                    <button onclick="copyBudgetToClipboard()" class="btn-success">Copiar para WhatsApp</button>
+                    <button onclick="clearBudget()" class="btn-danger">Borrar</button>
+                    <!-- NUEVO BOTÓN PDF -->
+                    <button onclick="downloadBudgetPdf()" class="btn-primary">Descargar PDF</button>
+                    <button onclick="copyBudgetToClipboard()" class="btn-success">WhatsApp</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- IMPORTANTE: EL ORDEN DE LOS SCRIPTS ES CLAVE -->
-    <!-- 1. Cargamos la lógica del presupuesto (funciones auxiliares) -->
+    <!-- 1. Lógica del presupuesto (incluye la nueva función PDF) -->
     <script src="logic/presupuesto.js"></script>
     
-    <!-- 2. Cargamos el script principal (búsqueda, renderizado y llamadas a presupuesto) -->
+    <!-- 2. Script principal -->
     <script src="logic/script.js"></script>
 </body>
 </html>
