@@ -9,17 +9,20 @@ const budgetItemsContainer = document.getElementById('budget-items-container');
 // --- CONFIGURACIÓN ---
 const PEDIDO_MINIMO_PORTES = 400; 
 const COSTE_PORTES = 12.00;       
-// URL de tu buscador de fichas (Ajusta si cambia tu dominio)
 const URL_FICHAS_WEB = "https://pablo2vbng.github.io/preciosCVTools/fichas.html"; 
 
 // --- FUNCIÓN PRINCIPAL: AÑADIR ---
-function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal) {
+// Nuevo parámetro final: stockText
+function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal, stockText) {
     qty = parseInt(qty);
     if (isNaN(qty) || qty < 1) qty = 1;
     
     minQty = parseInt(minQty) || 0;
     netPriceVal = parseFloat(netPriceVal) || 0;
     stdPrice = parseFloat(stdPrice) || 0;
+    
+    // Valor por defecto si no llega stockText
+    stockText = stockText || "Consultar";
 
     const existingItem = budget.find(item => item.ref === String(ref));
 
@@ -28,6 +31,7 @@ function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal) {
         existingItem.netInfo = netInfo; 
         existingItem.minQty = minQty;
         existingItem.netPriceVal = netPriceVal; 
+        existingItem.stockText = stockText; // Actualizamos stock
     } else {
         budget.push({ 
             ref: String(ref), 
@@ -36,7 +40,8 @@ function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal) {
             qty: qty,
             netInfo: netInfo, 
             minQty: minQty,
-            netPriceVal: netPriceVal 
+            netPriceVal: netPriceVal,
+            stockText: stockText // Guardamos stock
         });
     }
     
@@ -93,7 +98,6 @@ function updateBudgetUI() {
         let netInfoHtml = '';
         let priceDisplayHtml = '';
 
-        // Lógica visual de Neto
         if (item.minQty > 0 && item.netPriceVal > 0) {
             if (calc.isNetApplied) {
                 netInfoHtml = `
@@ -117,19 +121,18 @@ function updateBudgetUI() {
             priceDisplayHtml = `${item.stdPrice.toFixed(2)}€`;
         }
 
-        // HTML del ítem con el ICONO DE FICHA
         html += `
             <div class="budget-item">
                 <div class="budget-item-info">
-                    <!-- Título con enlace a ficha -->
                     <div style="display:flex; align-items:center; gap:8px;">
                         <strong>${item.desc}</strong>
-                        <a href="fichas.html" target="_blank" title="Buscar Ficha Técnica" style="text-decoration:none; font-size:1.1em;">
-                            📄
-                        </a>
+                        <a href="fichas.html" target="_blank" title="Buscar Ficha Técnica" style="text-decoration:none; font-size:1.1em;">📄</a>
                     </div>
                     
                     <span style="color:#666; font-size:0.8em">Ref: ${item.ref}</span>
+                    <!-- AQUI MOSTRAMOS EL STOCK EN EL MODAL -->
+                    <span style="color:#333; font-size:0.8em; margin-left:8px; font-weight:500;"> | ${item.stockText}</span>
+                    
                     ${netInfoHtml}
                 </div>
                 <div style="text-align:right; min-width: 100px;">
@@ -160,17 +163,14 @@ function updateBudgetUI() {
             const totalDisplay = document.querySelector('.total-display');
             if (totalDisplay) {
                 let htmlTotales = `<div style="font-size:0.9rem; text-align:right; margin-bottom:5px;">Subtotal: ${subtotal.toFixed(2)} €</div>`;
-                
                 if (costeEnvio > 0) {
                     htmlTotales += `<div style="font-size:0.9rem; text-align:right; color:#d9534f; margin-bottom:5px;">+ Portes: ${costeEnvio.toFixed(2)} €</div>`;
                     htmlTotales += `<div style="font-size:0.8rem; text-align:right; color:#999;">(Portes gratis a partir de ${PEDIDO_MINIMO_PORTES}€)</div>`;
                 } else {
                      htmlTotales += `<div style="font-size:0.9rem; text-align:right; color:#28a745; margin-bottom:5px;">Portes: GRATIS</div>`;
                 }
-
                 htmlTotales += `<div class="budget-total-line"><span>TOTAL:</span> <span>${totalFinal.toFixed(2)} €</span></div>`;
                 htmlTotales += `<div style="font-size:0.8rem; text-align:right; color:#666; margin-top:5px;">(Precios sin IVA)</div>`;
-                
                 totalDisplay.innerHTML = htmlTotales;
                 totalDisplay.style.display = 'block'; 
             }
@@ -182,12 +182,11 @@ function toggleBudgetModal() {
     if (budgetModal) budgetModal.classList.toggle('hidden');
 }
 
-// --- WHATSAPP (CON ENLACE A FICHAS) ---
+// --- WHATSAPP (CON STOCK) ---
 function copyBudgetToClipboard() {
     if (budget.length === 0) return;
 
     let subtotal = 0;
-
     let text = `📑 *PRESUPUESTO - CV TOOLS*\n`;
     text += `📅 Fecha: ${new Date().toLocaleDateString()}\n`;
     text += `--------------------------------\n\n`;
@@ -198,7 +197,8 @@ function copyBudgetToClipboard() {
 
         text += `🔹 *${item.desc}*\n`;
         text += `   Ref: ${item.ref}\n`;
-        // Enlace a la ficha
+        // AÑADIDO: Stock en WhatsApp
+        text += `   Stock: ${item.stockText}\n`;
         text += `   📄 Ficha: ${URL_FICHAS_WEB}\n`; 
         
         text += `   Cant: ${item.qty} x ${calc.unitPrice.toFixed(2)} €`;
@@ -224,7 +224,7 @@ function copyBudgetToClipboard() {
     });
 }
 
-// --- DESCARGAR PDF (CON MENCIÓN A FICHAS) ---
+// --- DESCARGAR PDF (CON STOCK) ---
 function downloadBudgetPdf() {
     if (budget.length === 0) {
         alert("El presupuesto está vacío.");
@@ -251,12 +251,13 @@ function downloadBudgetPdf() {
         const calc = calculateItemTotal(item);
         subtotal += calc.total;
         
-        // Descripción enriquecida
         let descText = item.desc;
+        // AÑADIDO: Stock en PDF
+        descText += `\n[ ${item.stockText} ]`;
+        
         if (calc.isNetApplied) {
             descText += `\n(Precio Neto aplicado por volumen > ${item.minQty})`;
         }
-        // AVISO DE FICHA EN EL PDF
         descText += `\n📄 Ver Ficha Técnica en Web`;
         
         return [
@@ -282,12 +283,9 @@ function downloadBudgetPdf() {
             3: { cellWidth: 25, halign: 'right' },
             4: { cellWidth: 25, halign: 'right' }
         },
-        // Estilos para la línea "Ver Ficha" en gris y cursiva
+        // Pintar el stock en un color distinto (opcional, pero queda bien)
         didParseCell: function(data) {
-            if (data.section === 'body' && data.column.index === 1) {
-                // No podemos cambiar estilo de parte del texto fácilmente,
-                // pero el texto ya indica que está en la web.
-            }
+            // No hacemos nada complejo, el texto ya lo incluye
         }
     });
     
@@ -297,7 +295,6 @@ function downloadBudgetPdf() {
     if (subtotal < PEDIDO_MINIMO_PORTES) costeEnvio = COSTE_PORTES;
     let totalFinal = subtotal + costeEnvio;
     
-    // 5. BLOQUE DE TOTALES
     doc.setFontSize(10);
     doc.text(`Subtotal:`, 160, finalY, { align: 'right' });
     doc.text(`${subtotal.toFixed(2)} €`, 195, finalY, { align: 'right' });
@@ -324,7 +321,6 @@ function downloadBudgetPdf() {
     doc.setTextColor(100);
     doc.text(`(Precios sin IVA)`, 195, finalY, { align: 'right' });
     
-    // 6. PIE DE PÁGINA
     doc.setFontSize(8);
     doc.setTextColor(0);
     doc.text('Presupuesto válido salvo error tipográfico. Fichas técnicas disponibles en nuestra web.', 14, 280);
