@@ -31,7 +31,7 @@ function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal, sto
         existingItem.netInfo = netInfo; 
         existingItem.minQty = minQty;
         existingItem.netPriceVal = netPriceVal; 
-        existingItem.stockText = stockText; // Actualizamos stock
+        existingItem.stockText = stockText; 
     } else {
         budget.push({ 
             ref: String(ref), 
@@ -41,7 +41,7 @@ function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal, sto
             netInfo: netInfo, 
             minQty: minQty,
             netPriceVal: netPriceVal,
-            stockText: stockText // Guardamos stock
+            stockText: stockText 
         });
     }
     
@@ -130,7 +130,6 @@ function updateBudgetUI() {
                     </div>
                     
                     <span style="color:#666; font-size:0.8em">Ref: ${item.ref}</span>
-                    <!-- AQUI MOSTRAMOS EL STOCK EN EL MODAL -->
                     <span style="color:#333; font-size:0.8em; margin-left:8px; font-weight:500;"> | ${item.stockText}</span>
                     
                     ${netInfoHtml}
@@ -163,14 +162,17 @@ function updateBudgetUI() {
             const totalDisplay = document.querySelector('.total-display');
             if (totalDisplay) {
                 let htmlTotales = `<div style="font-size:0.9rem; text-align:right; margin-bottom:5px;">Subtotal: ${subtotal.toFixed(2)} €</div>`;
+                
                 if (costeEnvio > 0) {
                     htmlTotales += `<div style="font-size:0.9rem; text-align:right; color:#d9534f; margin-bottom:5px;">+ Portes: ${costeEnvio.toFixed(2)} €</div>`;
                     htmlTotales += `<div style="font-size:0.8rem; text-align:right; color:#999;">(Portes gratis a partir de ${PEDIDO_MINIMO_PORTES}€)</div>`;
                 } else {
                      htmlTotales += `<div style="font-size:0.9rem; text-align:right; color:#28a745; margin-bottom:5px;">Portes: GRATIS</div>`;
                 }
+
                 htmlTotales += `<div class="budget-total-line"><span>TOTAL:</span> <span>${totalFinal.toFixed(2)} €</span></div>`;
                 htmlTotales += `<div style="font-size:0.8rem; text-align:right; color:#666; margin-top:5px;">(Precios sin IVA)</div>`;
+                
                 totalDisplay.innerHTML = htmlTotales;
                 totalDisplay.style.display = 'block'; 
             }
@@ -182,7 +184,7 @@ function toggleBudgetModal() {
     if (budgetModal) budgetModal.classList.toggle('hidden');
 }
 
-// --- WHATSAPP (CON STOCK) ---
+// --- WHATSAPP (CON STOCK Y ENLACE) ---
 function copyBudgetToClipboard() {
     if (budget.length === 0) return;
 
@@ -197,7 +199,6 @@ function copyBudgetToClipboard() {
 
         text += `🔹 *${item.desc}*\n`;
         text += `   Ref: ${item.ref}\n`;
-        // AÑADIDO: Stock en WhatsApp
         text += `   Stock: ${item.stockText}\n`;
         text += `   📄 Ficha: ${URL_FICHAS_WEB}\n`; 
         
@@ -224,7 +225,7 @@ function copyBudgetToClipboard() {
     });
 }
 
-// --- DESCARGAR PDF (CON STOCK) ---
+// --- DESCARGAR PDF (SIN ENLACE A FICHAS) ---
 function downloadBudgetPdf() {
     if (budget.length === 0) {
         alert("El presupuesto está vacío.");
@@ -252,13 +253,12 @@ function downloadBudgetPdf() {
         subtotal += calc.total;
         
         let descText = item.desc;
-        // AÑADIDO: Stock en PDF
+        // Stock en PDF
         descText += `\n[ ${item.stockText} ]`;
         
         if (calc.isNetApplied) {
             descText += `\n(Precio Neto aplicado por volumen > ${item.minQty})`;
         }
-        descText += `\n📄 Ver Ficha Técnica en Web`;
         
         return [
             item.ref,
@@ -282,10 +282,6 @@ function downloadBudgetPdf() {
             2: { cellWidth: 15, halign: 'center' },
             3: { cellWidth: 25, halign: 'right' },
             4: { cellWidth: 25, halign: 'right' }
-        },
-        // Pintar el stock en un color distinto (opcional, pero queda bien)
-        didParseCell: function(data) {
-            // No hacemos nada complejo, el texto ya lo incluye
         }
     });
     
