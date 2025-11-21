@@ -10,13 +10,14 @@ const PEDIDO_MINIMO_PORTES = 400;
 const COSTE_PORTES = 12.00;       
 
 // --- FUNCIÓN PRINCIPAL: AÑADIR ---
-// Nuevo parámetro al final: netPriceVal (el valor numérico del precio neto)
 function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal) {
     qty = parseInt(qty);
     if (isNaN(qty) || qty < 1) qty = 1;
     
+    // Aseguramos tipos numéricos
     minQty = parseInt(minQty) || 0;
-    netPriceVal = parseFloat(netPriceVal) || 0; // Aseguramos que sea número
+    netPriceVal = parseFloat(netPriceVal) || 0;
+    stdPrice = parseFloat(stdPrice) || 0;
 
     const existingItem = budget.find(item => item.ref === String(ref));
 
@@ -24,16 +25,16 @@ function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal) {
         existingItem.qty += qty;
         existingItem.netInfo = netInfo; 
         existingItem.minQty = minQty;
-        existingItem.netPriceVal = netPriceVal; // Actualizamos el precio neto
+        existingItem.netPriceVal = netPriceVal; 
     } else {
         budget.push({ 
             ref: String(ref), 
             desc: String(desc), 
-            stdPrice: parseFloat(stdPrice), // Precio Estándar
+            stdPrice: stdPrice, 
             qty: qty,
             netInfo: netInfo, 
             minQty: minQty,
-            netPriceVal: netPriceVal // Precio Neto Opcional
+            netPriceVal: netPriceVal 
         });
     }
     
@@ -63,17 +64,21 @@ function clearBudget() {
 function calculateItemTotal(item) {
     // Por defecto usamos el precio estándar
     let activePrice = item.stdPrice;
+    let isNetApplied = false;
     
-    // Si hay condición de neto (minQty > 0) Y hay un precio neto válido (> 0)
-    // Y la cantidad supera o iguala el mínimo...
+    // LOGICA NETO:
+    // 1. Debe existir una cantidad mínima (> 0)
+    // 2. Debe existir un precio neto válido (> 0)
+    // 3. La cantidad en el carrito debe ser MAYOR O IGUAL a la mínima
     if (item.minQty > 0 && item.netPriceVal > 0 && item.qty >= item.minQty) {
         activePrice = item.netPriceVal;
+        isNetApplied = true;
     }
     
     return {
         unitPrice: activePrice,
         total: activePrice * item.qty,
-        isNetApplied: (activePrice === item.netPriceVal && item.minQty > 0)
+        isNetApplied: isNetApplied
     };
 }
 
@@ -84,42 +89,35 @@ function updateBudgetUI() {
     let subtotal = 0;
     let html = '';
 
-    // Generar lista y calcular subtotal
     budget.forEach((item, index) => {
         const calc = calculateItemTotal(item);
         subtotal += calc.total;
         
-        // Lógica Visual (Mensajes)
+        // Lógica Visual (Mensajes en el modal)
         let netInfoHtml = '';
         let priceDisplayHtml = '';
 
-        // CASO 1: Tiene condición de neto definida
-        if (item.minQty > 0) {
+        if (item.minQty > 0 && item.netPriceVal > 0) {
             if (calc.isNetApplied) {
-                // Neto Aplicado (VERDE)
+                // Neto Aplicado
                 netInfoHtml = `
-                    <div style="color:#155724; font-size:0.85em; margin-top:4px; padding:2px 5px; background:#d4edda; border-radius:4px; border:1px solid #c3e6cb;">
-                        ✅ <strong>Neto Aplicado: ${item.netPriceVal.toFixed(2)}€</strong><br>
-                        (Condición >${item.minQty} uds cumplida)
+                    <div style="color:#155724; font-size:0.8em; margin-top:2px; padding:2px 5px; background:#d4edda; border-radius:4px; border:1px solid #c3e6cb;">
+                        ✅ <strong>Neto: ${item.netPriceVal.toFixed(2)}€</strong> (>${item.minQty} uds)
                     </div>`;
-                 // Tachamos el precio anterior
                  priceDisplayHtml = `<span style="text-decoration:line-through; color:#999; font-size:0.8em;">${item.stdPrice.toFixed(2)}€</span> <br> <strong>${item.netPriceVal.toFixed(2)}€</strong>`;
             } else {
-                // No llega al mínimo (ROJO)
+                // No llega al mínimo
                 netInfoHtml = `
-                    <div style="color:#856404; font-size:0.85em; margin-top:4px; padding:2px 5px; background:#fff3cd; border-radius:4px; border:1px solid #ffeeba;">
-                        ⚠️ <strong>Precio Neto no aplicado</strong><br>
-                        (Pide ${item.minQty} uds para precio ${item.netPriceVal.toFixed(2)}€)
+                    <div style="color:#856404; font-size:0.8em; margin-top:2px; padding:2px 5px; background:#fff3cd; border-radius:4px; border:1px solid #ffeeba;">
+                        ⚠️ Pide ${item.minQty} para neto a ${item.netPriceVal.toFixed(2)}€
                     </div>`;
                 priceDisplayHtml = `${item.stdPrice.toFixed(2)}€`;
             }
         } 
-        // CASO 2: Texto informativo sin lógica numérica clara
-        else if (item.netInfo && item.netInfo !== 'No aplica' && item.netInfo !== 'undefined') {
+        else if (item.netInfo && item.netInfo !== 'No aplica') {
             netInfoHtml = `<div style="color:#666; font-size:0.8em; margin-top:2px;">ℹ️ ${item.netInfo}</div>`;
             priceDisplayHtml = `${item.stdPrice.toFixed(2)}€`;
         } 
-        // CASO 3: Normal
         else {
             priceDisplayHtml = `${item.stdPrice.toFixed(2)}€`;
         }
@@ -142,14 +140,12 @@ function updateBudgetUI() {
         `;
     });
 
-    // Cálculos finales (Portes)
     let costeEnvio = 0;
     if (subtotal < PEDIDO_MINIMO_PORTES && subtotal > 0) {
         costeEnvio = COSTE_PORTES;
     }
     let totalFinal = subtotal + costeEnvio;
 
-    // Renderizar
     if (budgetItemsContainer) {
         if (budget.length === 0) {
             budgetItemsContainer.innerHTML = '<p class="empty-msg">No hay productos en el presupuesto.</p>';
@@ -170,6 +166,8 @@ function updateBudgetUI() {
                 }
 
                 htmlTotales += `<div class="budget-total-line"><span>TOTAL:</span> <span>${totalFinal.toFixed(2)} €</span></div>`;
+                htmlTotales += `<div style="font-size:0.8rem; text-align:right; color:#666; margin-top:5px;">(Precios sin IVA)</div>`;
+                
                 totalDisplay.innerHTML = htmlTotales;
                 totalDisplay.style.display = 'block'; 
             }
@@ -181,42 +179,52 @@ function toggleBudgetModal() {
     if (budgetModal) budgetModal.classList.toggle('hidden');
 }
 
-// --- WHATSAPP ---
+// --- WHATSAPP (FORMATO PRESUPUESTO) ---
 function copyBudgetToClipboard() {
     if (budget.length === 0) return;
 
     let subtotal = 0;
-    let text = `📦 *PRESUPUESTO CV TOOLS*\n------------------------------\n`;
+    // URL base de tu buscador de fichas
+    const fichasUrl = "https://pablo2vbng.github.io/preciosCVTools/fichas.html"; // Ajusta esto a tu URL real
+
+    let text = `📑 *PRESUPUESTO - CV TOOLS*\n`;
+    text += `📅 Fecha: ${new Date().toLocaleDateString()}\n`;
+    text += `--------------------------------\n\n`;
     
     budget.forEach(item => {
         const calc = calculateItemTotal(item);
         subtotal += calc.total;
 
-        text += `▪️ *${item.qty} ud.* x ${item.desc}\n`;
-        text += `   Ref: ${item.ref}`;
+        text += `🔹 *${item.desc}*\n`;
+        text += `   Ref: ${item.ref}\n`;
+        text += `   📄 Ficha: ${fichasUrl}\n`; // Enlace genérico para que busquen
+        text += `   Cant: ${item.qty} x ${calc.unitPrice.toFixed(2)} €`;
         
-        if (item.minQty > 0) {
-            if (calc.isNetApplied) {
-                text += `\n   ✅ NETO APLICADO (${calc.unitPrice.toFixed(2)}€)`;
-            } else {
-                 text += `\n   ⚠️ NO APLICA NETO (Pide ${item.minQty})`;
-            }
+        if (calc.isNetApplied) {
+            text += ` (Precio Neto)`;
         }
-        text += ` -> ${calc.total.toFixed(2)} €\n`;
+        text += `\n   *Subtotal: ${calc.total.toFixed(2)} €*\n\n`;
     });
 
     let costeEnvio = 0;
     if (subtotal < PEDIDO_MINIMO_PORTES) costeEnvio = COSTE_PORTES;
     let totalFinal = subtotal + costeEnvio;
     
-    text += `------------------------------\n`;
-    text += `Subtotal: ${subtotal.toFixed(2)} €\n`;
-    text += costeEnvio > 0 ? `Portes:   ${costeEnvio.toFixed(2)} €\n` : `Portes:   GRATIS\n`;
-    text += `💰 *TOTAL: ${totalFinal.toFixed(2)} €*\n`;
-    text += `------------------------------\n(Precios válidos salvo error tipográfico)\n`;
+    text += `--------------------------------\n`;
+    text += `Subtotal:      ${subtotal.toFixed(2)} €\n`;
+    
+    if (costeEnvio > 0) {
+        text += `Portes:        ${costeEnvio.toFixed(2)} €\n`;
+    } else {
+        text += `Portes:        GRATIS\n`;
+    }
+    
+    text += `\n💰 *TOTAL: ${totalFinal.toFixed(2)} €*\n`;
+    text += `*(Precios sin IVA)*\n`;
+    text += `--------------------------------`;
 
     navigator.clipboard.writeText(text).then(() => {
-        alert('¡Pedido copiado! Pégalo en WhatsApp o Email.');
+        alert('¡Presupuesto copiado al portapapeles!');
     }).catch(err => {
         alert('No se pudo copiar. Selecciónalo manualmente.');
     });
