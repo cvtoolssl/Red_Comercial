@@ -9,6 +9,8 @@ const budgetItemsContainer = document.getElementById('budget-items-container');
 // --- CONFIGURACIÓN ---
 const PEDIDO_MINIMO_PORTES = 400; 
 const COSTE_PORTES = 12.00;       
+// URL de tu buscador de fichas (Ajusta si cambia tu dominio)
+const URL_FICHAS_WEB = "https://pablo2vbng.github.io/preciosCVTools/fichas.html"; 
 
 // --- FUNCIÓN PRINCIPAL: AÑADIR ---
 function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal) {
@@ -91,6 +93,7 @@ function updateBudgetUI() {
         let netInfoHtml = '';
         let priceDisplayHtml = '';
 
+        // Lógica visual de Neto
         if (item.minQty > 0 && item.netPriceVal > 0) {
             if (calc.isNetApplied) {
                 netInfoHtml = `
@@ -114,10 +117,18 @@ function updateBudgetUI() {
             priceDisplayHtml = `${item.stdPrice.toFixed(2)}€`;
         }
 
+        // HTML del ítem con el ICONO DE FICHA
         html += `
             <div class="budget-item">
                 <div class="budget-item-info">
-                    <strong>${item.desc}</strong><br>
+                    <!-- Título con enlace a ficha -->
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <strong>${item.desc}</strong>
+                        <a href="fichas.html" target="_blank" title="Buscar Ficha Técnica" style="text-decoration:none; font-size:1.1em;">
+                            📄
+                        </a>
+                    </div>
+                    
                     <span style="color:#666; font-size:0.8em">Ref: ${item.ref}</span>
                     ${netInfoHtml}
                 </div>
@@ -145,17 +156,21 @@ function updateBudgetUI() {
             if(totalDisplay) totalDisplay.innerHTML = 'Total: 0.00 €';
         } else {
             budgetItemsContainer.innerHTML = html;
+            
             const totalDisplay = document.querySelector('.total-display');
             if (totalDisplay) {
                 let htmlTotales = `<div style="font-size:0.9rem; text-align:right; margin-bottom:5px;">Subtotal: ${subtotal.toFixed(2)} €</div>`;
+                
                 if (costeEnvio > 0) {
                     htmlTotales += `<div style="font-size:0.9rem; text-align:right; color:#d9534f; margin-bottom:5px;">+ Portes: ${costeEnvio.toFixed(2)} €</div>`;
                     htmlTotales += `<div style="font-size:0.8rem; text-align:right; color:#999;">(Portes gratis a partir de ${PEDIDO_MINIMO_PORTES}€)</div>`;
                 } else {
                      htmlTotales += `<div style="font-size:0.9rem; text-align:right; color:#28a745; margin-bottom:5px;">Portes: GRATIS</div>`;
                 }
+
                 htmlTotales += `<div class="budget-total-line"><span>TOTAL:</span> <span>${totalFinal.toFixed(2)} €</span></div>`;
                 htmlTotales += `<div style="font-size:0.8rem; text-align:right; color:#666; margin-top:5px;">(Precios sin IVA)</div>`;
+                
                 totalDisplay.innerHTML = htmlTotales;
                 totalDisplay.style.display = 'block'; 
             }
@@ -167,12 +182,11 @@ function toggleBudgetModal() {
     if (budgetModal) budgetModal.classList.toggle('hidden');
 }
 
-// --- WHATSAPP ---
+// --- WHATSAPP (CON ENLACE A FICHAS) ---
 function copyBudgetToClipboard() {
     if (budget.length === 0) return;
 
     let subtotal = 0;
-    const fichasUrl = "https://pablo2vbng.github.io/preciosCVTools/fichas.html"; 
 
     let text = `📑 *PRESUPUESTO - CV TOOLS*\n`;
     text += `📅 Fecha: ${new Date().toLocaleDateString()}\n`;
@@ -184,6 +198,9 @@ function copyBudgetToClipboard() {
 
         text += `🔹 *${item.desc}*\n`;
         text += `   Ref: ${item.ref}\n`;
+        // Enlace a la ficha
+        text += `   📄 Ficha: ${URL_FICHAS_WEB}\n`; 
+        
         text += `   Cant: ${item.qty} x ${calc.unitPrice.toFixed(2)} €`;
         if (calc.isNetApplied) text += ` (Precio Neto)`;
         text += `\n   *Subtotal: ${calc.total.toFixed(2)} €*\n\n`;
@@ -207,14 +224,13 @@ function copyBudgetToClipboard() {
     });
 }
 
-// --- NUEVA FUNCIÓN: DESCARGAR PDF ---
+// --- DESCARGAR PDF (CON MENCIÓN A FICHAS) ---
 function downloadBudgetPdf() {
     if (budget.length === 0) {
         alert("El presupuesto está vacío.");
         return;
     }
     
-    // Necesitamos jsPDF cargado en el HTML
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
@@ -229,17 +245,19 @@ function downloadBudgetPdf() {
     doc.setFontSize(10);
     doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 195, 26, { align: 'right' });
     
-    // 2. PREPARAR DATOS PARA TABLA
+    // 2. PREPARAR DATOS
     let subtotal = 0;
     const tableBody = budget.map(item => {
         const calc = calculateItemTotal(item);
         subtotal += calc.total;
         
-        // Descripción con aviso si es neto
+        // Descripción enriquecida
         let descText = item.desc;
         if (calc.isNetApplied) {
             descText += `\n(Precio Neto aplicado por volumen > ${item.minQty})`;
         }
+        // AVISO DE FICHA EN EL PDF
+        descText += `\n📄 Ver Ficha Técnica en Web`;
         
         return [
             item.ref,
@@ -256,17 +274,24 @@ function downloadBudgetPdf() {
         head: [['Ref.', 'Descripción', 'Cant.', 'Precio Ud.', 'Total']],
         body: tableBody,
         theme: 'grid',
-        headStyles: { fillColor: [0, 122, 255] }, // Azul CV Tools
+        headStyles: { fillColor: [0, 122, 255] }, 
         columnStyles: {
             0: { cellWidth: 25 },
             1: { cellWidth: 'auto' },
             2: { cellWidth: 15, halign: 'center' },
             3: { cellWidth: 25, halign: 'right' },
             4: { cellWidth: 25, halign: 'right' }
+        },
+        // Estilos para la línea "Ver Ficha" en gris y cursiva
+        didParseCell: function(data) {
+            if (data.section === 'body' && data.column.index === 1) {
+                // No podemos cambiar estilo de parte del texto fácilmente,
+                // pero el texto ya indica que está en la web.
+            }
         }
     });
     
-    // 4. CÁLCULO DE TOTALES (PORTES)
+    // 4. CÁLCULO DE TOTALES
     let finalY = doc.lastAutoTable.finalY + 10;
     let costeEnvio = 0;
     if (subtotal < PEDIDO_MINIMO_PORTES) costeEnvio = COSTE_PORTES;
@@ -282,9 +307,9 @@ function downloadBudgetPdf() {
     if (costeEnvio > 0) {
         doc.text(`${costeEnvio.toFixed(2)} €`, 195, finalY, { align: 'right' });
     } else {
-        doc.setTextColor(0, 150, 0); // Verde
+        doc.setTextColor(0, 150, 0); 
         doc.text(`GRATIS`, 195, finalY, { align: 'right' });
-        doc.setTextColor(0, 0, 0); // Reset color
+        doc.setTextColor(0, 0, 0); 
     }
     
     finalY += 8;
@@ -301,9 +326,9 @@ function downloadBudgetPdf() {
     
     // 6. PIE DE PÁGINA
     doc.setFontSize(8);
-    doc.text('Presupuesto válido salvo error tipográfico. Condiciones según tarifa vigente.', 14, 280);
+    doc.setTextColor(0);
+    doc.text('Presupuesto válido salvo error tipográfico. Fichas técnicas disponibles en nuestra web.', 14, 280);
     
-    // Descargar
     doc.save(`Presupuesto_CVTools_${new Date().toLocaleDateString().replace(/\//g,'-')}.pdf`);
 }
 

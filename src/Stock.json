@@ -1107,7 +1107,7 @@
     {
       "Artículo": "0233P",
       "Nombre artículo": "Cartel PVC 21X29 PROHIBIDO FUMAR Y ENCENDER FUEGO",
-      "Stock": 161,
+      "Stock": 160,
       "Estado": "fab"
     },
     {
@@ -1359,7 +1359,7 @@
     {
       "Artículo": "0252P",
       "Nombre artículo": "Cartel PVC 21x29 ATENCION RIESGO DE ATRAPAMIENTO",
-      "Stock": 73,
+      "Stock": 61,
       "Estado": "fab"
     },
     {
@@ -3783,7 +3783,7 @@
     {
       "Artículo": 403,
       "Nombre artículo": "Señal Bolsa de plastico nº 3 DIR. OBL. DERECHA",
-      "Stock": 1682,
+      "Stock": 1677,
       "Estado": "si"
     },
     {
@@ -3795,7 +3795,7 @@
     {
       "Artículo": 405,
       "Nombre artículo": "Señal Bolsa de plastico nº 5 OBRAS",
-      "Stock": 2622,
+      "Stock": 2617,
       "Estado": "si"
     },
     {
@@ -3831,7 +3831,7 @@
     {
       "Artículo": 411,
       "Nombre artículo": "Señal Bolsa de plastico nº 11 PROHIB. APARCAR",
-      "Stock": 1220,
+      "Stock": 1215,
       "Estado": "si"
     },
     {
@@ -3849,7 +3849,7 @@
     {
       "Artículo": 414,
       "Nombre artículo": "Señal Bolsa de plastico nº 14 VEL 20",
-      "Stock": 2331,
+      "Stock": 2326,
       "Estado": "si"
     },
     {
@@ -3891,13 +3891,13 @@
     {
       "Artículo": 421,
       "Nombre artículo": "Señal Bolsa de plastico nº 21 ESTRECH. IZQ.",
-      "Stock": 1673,
+      "Stock": 1668,
       "Estado": "si"
     },
     {
       "Artículo": 422,
       "Nombre artículo": "Señal Bolsa de plastico nº 22 ESTRECH. DERECHA",
-      "Stock": 3782,
+      "Stock": 3777,
       "Estado": "si"
     },
     {
@@ -4395,7 +4395,7 @@
     {
       "Artículo": 588,
       "Nombre artículo": "Hito 75 cm PVC blando Naranja Mod. E",
-      "Stock": 657,
+      "Stock": 642,
       "Estado": "si"
     },
     {
@@ -4515,7 +4515,7 @@
     {
       "Artículo": 597,
       "Nombre artículo": "Manga de viento c/aro 400x150mm L.1600mm",
-      "Stock": 4,
+      "Stock": 3,
       "Estado": "si"
     },
     {
@@ -5229,7 +5229,7 @@
     {
       "Artículo": 648,
       "Nombre artículo": "Señal metalica TR-301/20",
-      "Stock": -23,
+      "Stock": -34,
       "Estado": "fab"
     },
     {
@@ -5469,7 +5469,7 @@
     {
       "Artículo": 664,
       "Nombre artículo": "Señal metalica R-400a",
-      "Stock": -23,
+      "Stock": -25,
       "Estado": "fab"
     },
     {
@@ -5517,7 +5517,7 @@
     {
       "Artículo": 668,
       "Nombre artículo": "Señal metalica R-101",
-      "Stock": -27,
+      "Stock": -29,
       "Estado": "fab"
     },
     {
@@ -5559,7 +5559,7 @@
     {
       "Artículo": "0670D",
       "Nombre artículo": "Señal metalica R-5",
-      "Stock": 0,
+      "Stock": -1,
       "Estado": "fab"
     },
     {
@@ -5697,7 +5697,7 @@
     {
       "Artículo": "0676/30",
       "Nombre artículo": "Tubo 80x40 para señal metalica 3 metros",
-      "Stock": 56,
+      "Stock": 42,
       "Estado": "si"
     },
     {
@@ -5757,7 +5757,7 @@
     {
       "Artículo": 680,
       "Nombre artículo": "Placa informativa 40x20 blanca",
-      "Stock": 0,
+      "Stock": -2,
       "Estado": "fab"
     },
     {
@@ -5943,7 +5943,7 @@
     {
       "Artículo": 693,
       "Nombre artículo": "Tripode Tubular señal metalica mod. C",
-      "Stock": -47,
+      "Stock": -57,
       "Estado": "si"
     },
     {
@@ -5979,7 +5979,7 @@
     {
       "Artículo": 695,
       "Nombre artículo": "Tripode angular señal metalica mod. B",
-      "Stock": 2009,
+      "Stock": 2007,
       "Estado": "si"
     },
     {
@@ -8751,13 +8751,13 @@
     {
       "Artículo": 1125,
       "Nombre artículo": "Poste señaliz. 1 m Rojo/Blanco p/cadena plastica",
-      "Stock": 1961,
+      "Stock": 1935,
       "Estado": "si"
     },
     {
       "Artículo": "1125AN",
       "Nombre artículo": "Poste señaliz. 1 m Amarillo/negro p/cadena plastica",
-      "Stock": 288,
+      "Stock": 238,
       "Estado": "si"
     },
     {
@@ -8865,7 +8865,7 @@
     {
       "Artículo": 1128,
       "Nombre artículo": "Mts. Cadena plastico 5.5mm N/A",
-      "Stock": 7275,
+      "Stock": 7225,
       "Estado": "si"
     },
     {
@@ -9099,7 +9099,7 @@
     {
       "Artículo": 1540,
       "Nombre artículo": "Rollo cinta antideslizante negra 5cm x 18 mt",
-      "Stock": 704,
+      "Stock": 702,
       "Estado": "si"
     },
     {
@@ -9327,7 +9327,7 @@
     {
       "Artículo": 1570,
       "Nombre artículo": "Rollo cinta Señal.R-B 10cm x 200m. G300 2 caras",
-      "Stock": 6170,
+      "Stock": 6150,
       "Estado": "si"
     },
     {
@@ -10341,25 +10341,25 @@
     {
       "Artículo": 1908,
       "Nombre artículo": "Reductor Velocidad 50x50x5 cm Mod. B",
-      "Stock": 37,
+      "Stock": 29,
       "Estado": "si"
     },
     {
       "Artículo": "1909H",
       "Nombre artículo": "Extremo reductor velocidad 25x50x5 cm Mod. B H",
-      "Stock": 10,
+      "Stock": 9,
       "Estado": "si"
     },
     {
       "Artículo": "1909M",
       "Nombre artículo": "Extremo reductor velocidad 25x50x5 cm Mod. B M",
-      "Stock": 14,
+      "Stock": 13,
       "Estado": "si"
     },
     {
       "Artículo": 1910,
       "Nombre artículo": "Reductor velocidad - salva cables 50x60x5",
-      "Stock": 51,
+      "Stock": 47,
       "Estado": "si"
     },
     {
@@ -10395,7 +10395,7 @@
     {
       "Artículo": "1913/N",
       "Nombre artículo": "Separador Negro carril-bici 1 mt x 15 cm ancho x 5 cm alto",
-      "Stock": 420,
+      "Stock": 382,
       "Estado": "si"
     },
     {
@@ -10455,7 +10455,7 @@
     {
       "Artículo": 1916,
       "Nombre artículo": "Reductor velocidad 50x50x4,5 MOD C",
-      "Stock": 1032,
+      "Stock": 992,
       "Estado": "si"
     },
     {
@@ -11907,7 +11907,7 @@
     {
       "Artículo": 3304,
       "Nombre artículo": "Mts. Berengeno Mediano 34mm Base x 25mm Alt.",
-      "Stock": -250,
+      "Stock": 11500,
       "Estado": "si"
     },
     {
@@ -11985,7 +11985,7 @@
     {
       "Artículo": 3374,
       "Nombre artículo": "Separador rueda 50 m/m (250 Unid)",
-      "Stock": 178,
+      "Stock": 186,
       "Estado": "si"
     },
     {
@@ -14055,7 +14055,7 @@
     {
       "Artículo": "9070N1",
       "Nombre artículo": "Señal MOPU T.D. 70 cm NI",
-      "Stock": 0,
+      "Stock": -2,
       "Estado": "fab"
     },
     {
@@ -14193,7 +14193,7 @@
     {
       "Artículo": "9160N1",
       "Nombre artículo": "Señal MOPU R.D. 60 cm NI",
-      "Stock": -1,
+      "Stock": -6,
       "Estado": "fab"
     },
     {
@@ -14361,7 +14361,7 @@
     {
       "Artículo": "9260N1",
       "Nombre artículo": "Señal MOPU R2 60 cm NI",
-      "Stock": 14,
+      "Stock": 13,
       "Estado": "fab2"
     },
     {
@@ -15945,7 +15945,7 @@
     {
       "Artículo": "IMP 21X29",
       "Nombre artículo": "Impresión cartelería personalizada 21x29",
-      "Stock": -632,
+      "Stock": -635,
       "Estado": "no"
     },
     {
@@ -16191,7 +16191,7 @@
     {
       "Artículo": "PORTES",
       "Nombre artículo": "Portes hasta destino",
-      "Stock": -11836,
+      "Stock": -11839,
       "Estado": "no"
     },
     {
@@ -16251,7 +16251,7 @@
     {
       "Artículo": "PVC 21X29",
       "Nombre artículo": "Panel PVC 21x29 0.7mm",
-      "Stock": 13289,
+      "Stock": 13286,
       "Estado": "no"
     },
     {
