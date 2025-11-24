@@ -12,7 +12,6 @@ const COSTE_PORTES = 12.00;
 const URL_FICHAS_WEB = "https://pablo2vbng.github.io/preciosCVTools/fichas.html"; 
 
 // --- FUNCIÓN PRINCIPAL: AÑADIR ---
-// Nuevo parámetro final: stockText
 function addToBudget(ref, desc, stdPrice, qty, netInfo, minQty, netPriceVal, stockText) {
     qty = parseInt(qty);
     if (isNaN(qty) || qty < 1) qty = 1;

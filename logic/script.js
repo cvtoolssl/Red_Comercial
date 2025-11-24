@@ -105,41 +105,52 @@ function displayResults(products) {
 
     let html = '';
     products.forEach((product, index) => {
+        // --- 1. PRECIOS ESTÁNDAR ---
         let pvpBase = 0;
         let descuento = 'N/A';
         let precioFinal = 'N/A';
         let precioNetoTexto = 'No aplica'; 
         let precioFinalNumerico = 0;
 
+        // LÓGICA DE TARIFAS
         if (currentTariffFile.includes('General') || currentTariffFile.includes('Bigmat')) {
             descuento = '50%';
             precioFinalNumerico = product.PRECIO_ESTANDAR || 0;
             if (precioFinalNumerico > 0) pvpBase = precioFinalNumerico / 0.50;
             if (product.NETOS) precioNetoTexto = product.CONDICIONES_NETO;
+
         } else if (currentTariffFile.includes('Neopro') || currentTariffFile.includes('Ehlis') || currentTariffFile.includes('Synergas')) {
             descuento = '52%';
             precioFinalNumerico = product.PRECIO_GRUPO1 || 0;
             if (precioFinalNumerico > 0) pvpBase = precioFinalNumerico / 0.48;
             precioNetoTexto = 'No aplica';
+
         } else if (currentTariffFile.includes('Cecofersa')) {
             descuento = '52%';
             precioFinalNumerico = product.PRECIO_CECOFERSA || 0;
             if (precioFinalNumerico > 0) pvpBase = precioFinalNumerico / 0.48;
             if (product.NETOS) precioNetoTexto = product.CONDICIONES_NETO;
+
         } else if (currentTariffFile.includes('Grandes_Cuentas')) {
             descuento = '50%';
             precioFinalNumerico = product.PRECIO_ESTANDAR || 0;
             if (precioFinalNumerico > 0) pvpBase = precioFinalNumerico / 0.50;
             if (product.NETOS_GRANDE_CUENTAS) precioNetoTexto = product.CONDICION_NETO_GC;
+
         } else if (currentTariffFile.includes('Coferdroza')) {
             descuento = '50%';
             precioFinalNumerico = product.PRECIO_GRUPO3 || 0;
             if (precioFinalNumerico > 0) pvpBase = precioFinalNumerico / 0.50;
             precioNetoTexto = 'No aplica';
+
         } else if (currentTariffFile.includes('IndustrialPro')) {
+            // === INDUSTRIAL PRO (Mismas condiciones que Cecofersa) ===
             descuento = '52%';
-            precioFinalNumerico = product.PRECIO_ESTANDAR || 0;
+            // Intentamos varios campos por si el JSON varía
+            precioFinalNumerico = product.PRECIO_ESTANDAR || product.PRECIO_CECOFERSA || product.PRECIO || 0;
+            
             if (precioFinalNumerico > 0) pvpBase = precioFinalNumerico / 0.48;
+            
             if (product.NETOS) precioNetoTexto = product.CONDICIONES_NETO;
         }
         
@@ -148,7 +159,7 @@ function displayResults(products) {
         // --- 2. STOCK Y TEXTO PARA PRESUPUESTO ---
         const stockInfo = stockMap.get(String(product.Referencia));
         let stockHtml = '';
-        let stockTextForBudget = 'Consultar'; // Valor por defecto
+        let stockTextForBudget = 'Consultar'; 
 
         if (stockInfo) {
             const estado = stockInfo.Estado ? stockInfo.Estado.toLowerCase() : '';
@@ -176,7 +187,6 @@ function displayResults(products) {
         const safeRef = String(product.Referencia || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeDesc = String(product.Descripcion || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeNetoTxt = String(precioNetoTexto || 'No aplica').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        // Guardamos el texto del stock seguro
         const safeStockTxt = String(stockTextForBudget).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
         const minQty = extractMinQty(precioNetoTexto);
@@ -202,8 +212,6 @@ function displayResults(products) {
 
                 <div class="add-controls">
                     <input type="number" id="${qtyInputId}" class="qty-input" value="1" min="1">
-                    
-                    <!-- AÑADIDO PARÁMETRO 8: safeStockTxt -->
                     <button class="add-budget-btn" onclick="addToBudget('${safeRef}', '${safeDesc}', ${precioFinal}, document.getElementById('${qtyInputId}').value, '${safeNetoTxt}', ${minQty}, ${netPriceVal}, '${safeStockTxt}')">
                         + Añadir al presupuesto
                     </button>
