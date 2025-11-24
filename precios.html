@@ -6,7 +6,7 @@
     <title>Buscador de Precios - CV Tools</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- LIBRERÍAS PARA GENERAR PDF (Necesarias para el botón de descarga) -->
+    <!-- LIBRERÍAS PARA GENERAR PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -35,6 +35,7 @@
                         <option value="Tarifa_Synergas.json">Tarifa Synergas</option>
                         <option value="Tarifa_Grandes_Cuentas.json">Tarifa Grandes Cuentas</option>
                         <option value="Tarifa_Coferdroza.json">Tarifa Coferdroza</option>
+                        <option value="Tarifa_IndustrialPro.json">Tarifa Industrial Pro</option>
                     </select>
                  </div>
 
@@ -75,7 +76,7 @@
                 <p class="total-display">Total: <span id="budget-total">0.00</span> €</p>
                 <div class="budget-actions">
                     <button onclick="clearBudget()" class="btn-danger">Borrar</button>
-                    <!-- NUEVO BOTÓN PDF -->
+                    <!-- BOTÓN PDF -->
                     <button onclick="downloadBudgetPdf()" class="btn-primary">Descargar PDF</button>
                     <button onclick="copyBudgetToClipboard()" class="btn-success">WhatsApp</button>
                 </div>
@@ -83,7 +84,7 @@
         </div>
     </div>
 
-    <!-- 1. Lógica del presupuesto (incluye la nueva función PDF) -->
+    <!-- 1. Lógica del presupuesto -->
     <script src="logic/presupuesto.js"></script>
     
     <!-- 2. Script principal -->

@@ -105,7 +105,6 @@ function displayResults(products) {
 
     let html = '';
     products.forEach((product, index) => {
-        // --- 1. PRECIOS ESTÁNDAR ---
         let pvpBase = 0;
         let descuento = 'N/A';
         let precioFinal = 'N/A';
@@ -137,6 +136,11 @@ function displayResults(products) {
             precioFinalNumerico = product.PRECIO_GRUPO3 || 0;
             if (precioFinalNumerico > 0) pvpBase = precioFinalNumerico / 0.50;
             precioNetoTexto = 'No aplica';
+        } else if (currentTariffFile.includes('IndustrialPro')) {
+            descuento = '52%';
+            precioFinalNumerico = product.PRECIO_ESTANDAR || 0;
+            if (precioFinalNumerico > 0) pvpBase = precioFinalNumerico / 0.48;
+            if (product.NETOS) precioNetoTexto = product.CONDICIONES_NETO;
         }
         
         precioFinal = precioFinalNumerico.toFixed(2);
