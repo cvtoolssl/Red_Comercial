@@ -1,4 +1,28 @@
-// tarifas.js
+// logic/tarifas.js
+
+// --- 1. FUNCIONES AUXILIARES DE SEGURIDAD ---
+
+// Convierte cualquier formato de precio (texto con coma, número, etc.) a un número flotante válido
+function parsePrice(value) {
+    if (!value) return 0;
+    if (typeof value === 'number') return value;
+    
+    // Convertir a string, quitar símbolos de moneda y espacios
+    let stringVal = String(value).replace(/[€$£\s]/g, '');
+    
+    // Reemplazar coma por punto si existe
+    stringVal = stringVal.replace(',', '.');
+    
+    const floatVal = parseFloat(stringVal);
+    return isNaN(floatVal) ? 0 : floatVal;
+}
+
+// Asegura que el texto no sea null o undefined
+function safeStr(text) {
+    return text ? String(text) : '';
+}
+
+// --- 2. CARGA DE DATOS ---
 
 // Función para cargar un archivo JSON de tarifa específico desde la carpeta 'src'
 async function loadTariffForPdf(tariffFile) {
@@ -14,15 +38,23 @@ async function loadTariffForPdf(tariffFile) {
         if (Array.isArray(dataObject)) {
             return dataObject;
         } else {
+            // Si es un objeto tipo Excel exportado (con nombre de hoja), tomamos la primera hoja
             const sheetName = Object.keys(dataObject)[0];
             return dataObject[sheetName];
         }
     } catch (error) {
-        alert(`Error al cargar la tarifa: ${tariffFile}. \nAsegúrate de que el archivo existe en la carpeta 'src/'.`);
         console.error("Detalle del error:", error);
+        // Detectar si es error de CORS (abrir archivo localmente sin servidor)
+        if (window.location.protocol === 'file:') {
+            alert(`Error de Seguridad (CORS): No se pueden cargar archivos JSON ('${tariffFile}') abriendo el HTML directamente.\n\nSolución: Debes usar un servidor local (Live Server en VSCode) o subirlo a GitHub Pages.`);
+        } else {
+            alert(`Error al cargar la tarifa: ${tariffFile}.\nRevisa que el archivo exista en 'src/' y el formato JSON sea correcto.`);
+        }
         return null;
     }
 }
+
+// --- 3. GENERACIÓN DE PDF ---
 
 // Función genérica para crear un PDF
 function generatePdf(title, head, bodyData, button) {
@@ -32,165 +64,221 @@ function generatePdf(title, head, bodyData, button) {
     }
     
     // Aseguramos que jsPDF esté cargado correctamente
-    const { jsPDF } = window.jspdf;
-    if (!jsPDF) {
+    if (!window.jspdf) {
         alert("Error: La librería jsPDF no se ha cargado. Revisa tu conexión a internet.");
         return;
     }
 
+    const { jsPDF } = window.jspdf;
+    
+    // Feedback visual en el botón
     const originalText = button.textContent;
     button.textContent = 'Generando...';
     button.disabled = true;
 
     try {
         const doc = new jsPDF({ orientation: 'landscape' });
-        
-        // Título
-        doc.setFontSize(14);
-        doc.text(title, 14, 15);
-        doc.setFontSize(10);
-        doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 20);
 
-        // Tabla
+        // Verificamos que el plugin autoTable se haya cargado
+        if (typeof doc.autoTable !== 'function') {
+            throw new Error("El plugin 'jspdf-autotable' no se ha cargado correctamente.");
+        }
+        
+        // --- CABECERA DEL DOCUMENTO ---
+        doc.setFontSize(14);
+        doc.text(title.toUpperCase(), 14, 15);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 14, 22);
+        
+        // --- TABLA DE PRECIOS ---
         doc.autoTable({
             head: [head], 
             body: bodyData, 
-            startY: 25, 
+            startY: 28, 
             theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 1.5 }, 
-            headStyles: { fillColor: [0, 122, 255], fontSize: 7, halign: 'center' },
+            styles: { 
+                fontSize: 8, 
+                cellPadding: 1.5,
+                valign: 'middle'
+            }, 
+            headStyles: { 
+                fillColor: [0, 122, 255], // Azul corporativo
+                textColor: 255,
+                fontSize: 8, 
+                fontStyle: 'bold',
+                halign: 'center' 
+            },
             columnStyles: {
                 0: { cellWidth: 25 }, // Ref
-                2: { halign: 'right' }, // PVP Base
-                3: { halign: 'center' }, // Dto
-                4: { halign: 'right', fontStyle: 'bold' } // Precio Final
+                1: { cellWidth: 'auto' }, // Descripción
+                2: { halign: 'right', cellWidth: 20 }, // PVP Base
+                3: { halign: 'center', cellWidth: 15 }, // Dto
+                4: { halign: 'right', fontStyle: 'bold', cellWidth: 20 }, // Precio Final
+                5: { cellWidth: 40 } // Condiciones
+            },
+            // Formateo alternativo de filas para mejor lectura
+            alternateRowStyles: {
+                fillColor: [245, 245, 245]
             }
         });
 
-        doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
+        // Guardar el archivo
+        const fileName = `${title.replace(/\s+/g, '_')}_${new Date().toLocaleDateString().replace(/\//g,'-')}.pdf`;
+        doc.save(fileName);
+
     } catch (err) {
         console.error(err);
-        alert("Ocurrió un error al generar el PDF. Revisa la consola (F12) para más detalles.");
+        alert(`Ocurrió un error al generar el PDF:\n${err.message}`);
+    } finally {
+        // Restaurar botón
+        button.textContent = originalText;
+        button.disabled = false;
     }
-
-    button.textContent = originalText;
-    button.disabled = false;
 }
 
-// Configuración de cabecera
-const head = ['Ref.', 'Descripción', 'PVP Base', 'Dto.', 'Precio Final', 'Precio por Cantidad'];
+// Configuración de cabecera de la tabla
+const head = ['Ref.', 'Descripción', 'PVP Base', 'Dto.', 'Precio Final', 'Notas / Neto'];
 
-// --- EVENT LISTENERS PARA CADA BOTÓN ---
+// --- 4. EVENT LISTENERS ---
 
+// TARIFA GENERAL
 document.getElementById('pdf-general').addEventListener('click', async (e) => {
     const products = await loadTariffForPdf('Tarifa_General.json');
     if (!products) return;
+
     const body = products.map(p => {
-        const precioFinal = p.PRECIO_ESTANDAR || 0;
+        const precioFinal = parsePrice(p.PRECIO_ESTANDAR);
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.50).toFixed(2) : '0.00';
-        if (p.NETOS) return [p.Referencia, p.Descripcion, `${pvpBase} €`, 'Neto', '-', p.CONDICIONES_NETO];
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '50%', `${precioFinal.toFixed(2)} €`, '-'];
+        
+        if (p.NETOS) {
+            return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, 'Neto', '-', safeStr(p.CONDICIONES_NETO)];
+        }
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '50%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa General', head, body, e.target);
 });
 
+// BIGMAT
 document.getElementById('pdf-bigmat').addEventListener('click', async (e) => {
     const products = await loadTariffForPdf('Tarifa_Bigmat.json');
     if (!products) return;
+
     const body = products.map(p => {
-        const precioFinal = p.PRECIO_ESTANDAR || 0;
+        const precioFinal = parsePrice(p.PRECIO_ESTANDAR);
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.50).toFixed(2) : '0.00';
-        if (p.NETOS) return [p.Referencia, p.Descripcion, `${pvpBase} €`, 'Neto', '-', p.CONDICIONES_NETO];
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '50%', `${precioFinal.toFixed(2)} €`, '-'];
+        
+        if (p.NETOS) {
+            return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, 'Neto', '-', safeStr(p.CONDICIONES_NETO)];
+        }
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '50%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa BigMat', head, body, e.target);
 });
 
+// NEOPRO
 document.getElementById('pdf-neopro').addEventListener('click', async (e) => {
     const products = await loadTariffForPdf('Tarifa_Neopro.json');
     if (!products) return;
+
     const body = products.map(p => {
-        const precioFinal = p.PRECIO_GRUPO1 || 0;
+        const precioFinal = parsePrice(p.PRECIO_GRUPO1);
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.48).toFixed(2) : '0.00';
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa Neopro', head, body, e.target);
 });
 
+// EHLIS
 document.getElementById('pdf-ehlis').addEventListener('click', async (e) => {
     const products = await loadTariffForPdf('Tarifa_Ehlis.json');
     if (!products) return;
+
     const body = products.map(p => {
-        const precioFinal = p.PRECIO_GRUPO1 || 0;
+        const precioFinal = parsePrice(p.PRECIO_GRUPO1);
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.48).toFixed(2) : '0.00';
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa Ehlis', head, body, e.target);
 });
 
+// CECOFERSA
 document.getElementById('pdf-cecofersa').addEventListener('click', async (e) => {
     const products = await loadTariffForPdf('Tarifa_Cecofersa.json');
     if (!products) return;
+
     const body = products.map(p => {
-        const precioFinal = p.PRECIO_CECOFERSA || 0;
+        const precioFinal = parsePrice(p.PRECIO_CECOFERSA);
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.48).toFixed(2) : '0.00';
-        if (p.NETOS) return [p.Referencia, p.Descripcion, `${pvpBase} €`, 'Neto', '-', p.CONDICIONES_NETO];
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
+        
+        if (p.NETOS) {
+            return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, 'Neto', '-', safeStr(p.CONDICIONES_NETO)];
+        }
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa Cecofersa', head, body, e.target);
 });
 
+// SYNERGAS
 document.getElementById('pdf-synergas').addEventListener('click', async (e) => {
     const products = await loadTariffForPdf('Tarifa_Synergas.json');
     if (!products) return;
+
     const body = products.map(p => {
-        const precioFinal = p.PRECIO_GRUPO1 || 0;
+        const precioFinal = parsePrice(p.PRECIO_GRUPO1);
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.48).toFixed(2) : '0.00';
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa Synergas', head, body, e.target);
 });
 
+// GRANDES CUENTAS
 document.getElementById('pdf-grandes-cuentas').addEventListener('click', async (e) => {
     const products = await loadTariffForPdf('Tarifa_Grandes_Cuentas.json');
     if (!products) return;
+
     const body = products.map(p => {
-        const precioFinal = p.PRECIO_ESTANDAR || 0;
+        const precioFinal = parsePrice(p.PRECIO_ESTANDAR);
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.50).toFixed(2) : '0.00';
-        if (p.NETOS_GRANDE_CUENTAS) return [p.Referencia, p.Descripcion, `${pvpBase} €`, 'Neto G.C.', '-', p.CONDICION_NETO_GC];
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '50%', `${precioFinal.toFixed(2)} €`, '-'];
+        
+        if (p.NETOS_GRANDE_CUENTAS) {
+            return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, 'Neto G.C.', '-', safeStr(p.CONDICION_NETO_GC)];
+        }
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '50%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa Grandes Cuentas', head, body, e.target);
 });
 
+// COFERDROZA
 document.getElementById('pdf-coferdroza').addEventListener('click', async (e) => {
     const products = await loadTariffForPdf('Tarifa_Coferdroza.json');
     if (!products) return;
+
     const body = products.map(p => {
-        const precioFinal = p.PRECIO_GRUPO3 || 0;
+        const precioFinal = parsePrice(p.PRECIO_GRUPO3);
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.50).toFixed(2) : '0.00';
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '50%', `${precioFinal.toFixed(2)} €`, '-'];
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '50%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa Coferdroza', head, body, e.target);
 });
 
-
+// INDUSTRIAL PRO
 document.getElementById('pdf-industrial-pro').addEventListener('click', async (e) => {
-    // Asegúrate de que el archivo Tarifa_IndustrialPro.json existe en src/
     const products = await loadTariffForPdf('Tarifa_IndustrialPro.json');
     if (!products) return;
     
     const body = products.map(p => {
-        // Condiciones: Divisor 0.48 (Margen), Descuento 52%
-        // Buscamos PRECIO_ESTANDAR o PRECIO_CECOFERSA o PRECIO por si acaso
-        const precioFinal = p.PRECIO_ESTANDAR || p.PRECIO_CECOFERSA || p.PRECIO || 0; 
+        // Intentamos encontrar el precio en varios campos posibles
+        let rawPrice = p.PRECIO_ESTANDAR || p.PRECIO_CECOFERSA || p.PRECIO;
+        const precioFinal = parsePrice(rawPrice);
         
         const pvpBase = (precioFinal > 0) ? (precioFinal / 0.48).toFixed(2) : '0.00';
         
         if (p.NETOS) {
-            return [p.Referencia, p.Descripcion, `${pvpBase} €`, 'Neto', '-', p.CONDICIONES_NETO];
+            return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, 'Neto', '-', safeStr(p.CONDICIONES_NETO)];
         }
-        return [p.Referencia, p.Descripcion, `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
+        return [safeStr(p.Referencia), safeStr(p.Descripcion), `${pvpBase} €`, '52%', `${precioFinal.toFixed(2)} €`, '-'];
     });
     generatePdf('Tarifa Industrial Pro', head, body, e.target);
 });
